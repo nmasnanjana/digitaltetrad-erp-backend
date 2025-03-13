@@ -1,7 +1,8 @@
 import express from 'express';
 import logger from './utils/logger';
 import dotenv from 'dotenv';
-import sequelize from './config/db_config'
+import sequelize from './config/dbConfig'
+import webRoutes from './routes/web';
 
 dotenv.config();
 
@@ -10,11 +11,7 @@ const PORT = process.env.PORT || 4575;
 
 // Middleware
 app.use(express.json());
-
-// Test route
-app.get('/', (req, res) => {
-    res.send('Server is running');
-});
+app.use('/api', webRoutes)
 
 // Start server
 app.listen(PORT, async () => {
