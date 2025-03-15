@@ -1,13 +1,13 @@
 import {Request, Response, RequestHandler} from "express";
 import User from "../models/user";
 import logger from "../utils/logger";
-import bcrypt = require("bcrypt");
+import bcrypt = require("bcryptjs");
 import dotenv from 'dotenv';
 import jwt from "jsonwebtoken";
 
 dotenv.config();
 
-const JWT_SECRET = process.env.JWT_SECRET || "your_secret_key";
+const JWT_SECRET = process.env.JWT_SECRET || "secret";
 const TOKEN_EXPIRY = "30d";
 
 class UserController {
