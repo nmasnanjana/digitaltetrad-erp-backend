@@ -57,13 +57,11 @@ class UserController {
     // get all registered users and their roles
     static async getAllUsers(req: Request, res: Response): Promise<any> {
         try {
-
             const users = await User.findAll({
-                attributes: ['id', 'firstName', 'lastName', 'username', 'role'],
+                attributes: ['id', 'firstName', 'lastName', 'username', 'role', 'email', 'isActive', 'lastLogin'],
             });
 
             return res.status(200).json(users);
-
         } catch (e: unknown) {
             if (e instanceof Error) {
                 logger.error(e.message);

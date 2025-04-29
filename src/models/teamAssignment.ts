@@ -6,7 +6,7 @@ import Team from "./team";
 class TeamAssignment extends Model {
     public id!: number;
     public team_id!: number;
-    public user_id!: number;
+    public user_id!: string;
 }
 
 TeamAssignment.init(
@@ -25,7 +25,7 @@ TeamAssignment.init(
             },
         },
         user_id: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.UUID,
             allowNull: false,
             references: {
                 model: User,

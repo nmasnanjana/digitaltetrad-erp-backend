@@ -16,8 +16,8 @@ class JobController {
             }
 
             // Validate type enum
-            if (!['device update', 'new device install'].includes(type)) {
-                const msg = "Invalid job type. Must be either 'device update' or 'new device install'";
+            if (!['supply and installation', 'installation', 'maintenance'].includes(type)) {
+                const msg = "Invalid job type. Must be one of: 'supply and installation', 'installation', 'maintenance'";
                 logger.warn(msg);
                 return res.status(400).send({error: msg});
             }
@@ -27,7 +27,7 @@ class JobController {
                 type,
                 team_id,
                 customer_id,
-                status: 'init' // Default status
+                status: 'open' // Default status
             });
 
             const msg = `New job created - ${newJob.name}`;
@@ -119,15 +119,15 @@ class JobController {
             }
 
             // Validate status enum if provided
-            if (status && !['init', 'progress', 'finish'].includes(status)) {
-                const msg = "Invalid status. Must be either 'init', 'progress', or 'finish'";
+            if (status && !['open', 'in progress', 'installed', 'qc', 'pat', 'closed'].includes(status)) {
+                const msg = "Invalid status. Must be one of: 'open', 'in progress', 'installed', 'qc', 'pat', 'closed'";
                 logger.warn(msg);
                 return res.status(400).send({error: msg});
             }
 
             // Validate type enum if provided
-            if (type && !['device update', 'new device install'].includes(type)) {
-                const msg = "Invalid job type. Must be either 'device update' or 'new device install'";
+            if (type && !['supply and installation', 'installation', 'maintenance'].includes(type)) {
+                const msg = "Invalid job type. Must be one of: 'supply and installation', 'installation', 'maintenance'";
                 logger.warn(msg);
                 return res.status(400).send({error: msg});
             }

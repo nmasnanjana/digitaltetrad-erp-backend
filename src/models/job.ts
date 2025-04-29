@@ -6,8 +6,8 @@ import Customer from './customer';
 class Job extends Model {
     public id!: number;
     public name!: string;
-    public status!: 'init' | 'progress' | 'finish';
-    public type!: 'device update' | 'new device install';
+    public status!: 'open' | 'in progress' | 'installed' | 'qc' | 'pat' | 'closed';
+    public type!: 'supply and installation' | 'installation' | 'maintenance';
     public team_id!: number;
     public customer_id!: number;
 }
@@ -24,13 +24,16 @@ Job.init(
             allowNull: false,
         },
         status: {
-            type: DataTypes.ENUM('init', 'progress', 'finish'),
+            type: DataTypes.ENUM('open','in progress' ,'installed', 'qc', 'pat', 'closed'),
             allowNull: false,
-            defaultValue: 'init',
+            defaultValue: 'open',
         },
         type: {
-            type: DataTypes.ENUM('device update', 'new device install'),
+            type: DataTypes.STRING(50),
             allowNull: false,
+            validate: {
+                isIn: [['supply and installation', 'installation', 'maintenance']]
+            }
         },
         team_id: {
             type: DataTypes.INTEGER,
