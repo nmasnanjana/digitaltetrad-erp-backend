@@ -80,7 +80,7 @@ class UserController {
 
             const { id } = req.params;
             const user = await User.findByPk(id, {
-                attributes: ['id', 'firstName', 'lastName', 'username', 'role', 'email'],
+                attributes: ['id', 'firstName', 'lastName', 'username', 'role', 'email', 'isActive', 'lastLogin'],
             });
 
             if (!user) return res.status(404).send({error: 'User not found'});
