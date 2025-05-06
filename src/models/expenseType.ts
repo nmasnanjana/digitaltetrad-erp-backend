@@ -32,9 +32,8 @@ ExpenseType.init(
     {
         sequelize,
         modelName: 'ExpenseType',
+        tableName: 'expense_types',
         timestamps: true,
-        createdAt: true,
-        updatedAt: true,
     }
 );
 

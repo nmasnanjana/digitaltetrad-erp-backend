@@ -12,8 +12,6 @@ class Expense extends Model {
     public description!: string;
     public amount!: number;
     public edited_by!: string;
-    public createdAt!: Date;
-    public updatedAt!: Date;
 }
 
 Expense.init(
@@ -30,6 +28,8 @@ Expense.init(
                 model: ExpenseType,
                 key: 'id',
             },
+            onDelete: 'RESTRICT',
+            onUpdate: 'CASCADE',
         },
         operations: {
             type: DataTypes.BOOLEAN,
@@ -43,13 +43,15 @@ Expense.init(
                 model: Job,
                 key: 'id',
             },
+            onDelete: 'SET NULL',
+            onUpdate: 'CASCADE',
         },
         description: {
             type: DataTypes.TEXT,
             allowNull: false,
         },
         amount: {
-            type: DataTypes.FLOAT,
+            type: DataTypes.DECIMAL(10, 2),
             allowNull: false,
         },
         edited_by: {
@@ -59,20 +61,30 @@ Expense.init(
                 model: User,
                 key: 'id',
             },
+            onDelete: 'RESTRICT',
+            onUpdate: 'CASCADE',
         },
     },
     {
         sequelize,
         modelName: 'Expense',
+        tableName: 'expenses',
         timestamps: true,
-        createdAt: true,
-        updatedAt: true,
+        indexes: [
+            {
+                name: 'expenses_type_id_fk',
+                fields: ['expenses_type_id'],
+            },
+            {
+                name: 'expenses_job_id_fk',
+                fields: ['job_id'],
+            },
+            {
+                name: 'expenses_edited_by_fk',
+                fields: ['edited_by'],
+            },
+        ],
     }
 );
-
-// Add associations
-Expense.belongsTo(ExpenseType, { foreignKey: 'expenses_type_id' });
-Expense.belongsTo(Job, { foreignKey: 'job_id' });
-Expense.belongsTo(User, { foreignKey: 'edited_by' });
 
 export default Expense; 

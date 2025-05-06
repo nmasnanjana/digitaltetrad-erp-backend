@@ -1,4 +1,4 @@
-import {Model, DataTypes, InferAttributes, InferCreationAttributes} from 'sequelize';
+import {Model, DataTypes} from 'sequelize';
 import sequelize from '../config/dbConfig';
 
 class Customer extends Model {
@@ -21,9 +21,8 @@ Customer.init(
     {
         sequelize,
         modelName: 'Customer',
+        tableName: 'customers',
         timestamps: true,
-        createdAt: true,
-        updatedAt: true,
     }
 );
 
