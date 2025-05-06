@@ -122,8 +122,17 @@ class ExpenseController {
                 reason_to_edit
             });
 
+            // Fetch the updated expense with all associations
+            const updatedExpense = await Expense.findByPk(id, {
+                include: [
+                    { model: Expense.sequelize?.models.ExpenseType, as: 'expenseType' },
+                    { model: Expense.sequelize?.models.Job, as: 'job' },
+                    { model: Expense.sequelize?.models.User, as: 'editor' }
+                ]
+            });
+
             logger.info(`Expense ${id} updated successfully`);
-            return res.status(200).json(expense);
+            return res.status(200).json(updatedExpense);
         } catch (e: unknown) {
             if (e instanceof Error) {
                 logger.error(e.message);
