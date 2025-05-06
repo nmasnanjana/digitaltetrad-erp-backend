@@ -57,10 +57,10 @@ class ExpenseController {
     // Create new expense
     static async createExpense(req: Request, res: Response): Promise<any> {
         try {
-            const { expense_type_id, operations, job_id, description, amount } = req.body;
+            const { expenses_type_id, operations, job_id, description, amount } = req.body;
 
             // Validate required fields
-            if (!expense_type_id || !description || amount === undefined) {
+            if (!expenses_type_id || !description || amount === undefined) {
                 return res.status(400).send({ error: 'Required fields are missing' });
             }
 
@@ -70,7 +70,7 @@ class ExpenseController {
             }
 
             const newExpense = await Expense.create({
-                expense_type_id,
+                expenses_type_id,
                 operations,
                 job_id: operations ? null : job_id,
                 description,
@@ -95,7 +95,7 @@ class ExpenseController {
     static async updateExpense(req: Request, res: Response): Promise<any> {
         try {
             const { id } = req.params;
-            const { expense_type_id, operations, job_id, description, amount, edited_by, reason_to_edit } = req.body;
+            const { expenses_type_id, operations, job_id, description, amount, edited_by, reason_to_edit } = req.body;
 
             const expense = await Expense.findByPk(id);
             if (!expense) {
@@ -103,7 +103,7 @@ class ExpenseController {
             }
 
             // Validate required fields
-            if (!expense_type_id || !description || amount === undefined || !edited_by || !reason_to_edit) {
+            if (!expenses_type_id || !description || amount === undefined || !edited_by || !reason_to_edit) {
                 return res.status(400).send({ error: 'Required fields are missing' });
             }
 
@@ -113,7 +113,7 @@ class ExpenseController {
             }
 
             await expense.update({
-                expense_type_id,
+                expenses_type_id,
                 operations,
                 job_id: operations ? null : job_id,
                 description,
