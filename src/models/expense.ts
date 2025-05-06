@@ -11,7 +11,8 @@ class Expense extends Model {
     public job_id?: number;
     public description!: string;
     public amount!: number;
-    public edited_by!: string;
+    public edited_by?: string;
+    public reason_to_edit?: string;
 }
 
 Expense.init(
@@ -51,18 +52,22 @@ Expense.init(
             allowNull: false,
         },
         amount: {
-            type: DataTypes.DECIMAL(10, 2),
+            type: DataTypes.FLOAT,
             allowNull: false,
         },
         edited_by: {
             type: DataTypes.UUID,
-            allowNull: false,
+            allowNull: true,
             references: {
                 model: User,
                 key: 'id',
             },
             onDelete: 'RESTRICT',
             onUpdate: 'CASCADE',
+        },
+        reason_to_edit: {
+            type: DataTypes.TEXT,
+            allowNull: true,
         },
     },
     {
