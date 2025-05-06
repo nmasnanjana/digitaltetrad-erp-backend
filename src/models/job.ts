@@ -1,4 +1,4 @@
-import {Model, DataTypes, InferAttributes, InferCreationAttributes} from 'sequelize';
+import {Model, DataTypes} from 'sequelize';
 import sequelize from '../config/dbConfig';
 import Team from './team';
 import Customer from './customer';
@@ -29,11 +29,8 @@ Job.init(
             defaultValue: 'open',
         },
         type: {
-            type: DataTypes.STRING(50),
+            type: DataTypes.ENUM('supply and installation', 'installation', 'maintenance'),
             allowNull: false,
-            validate: {
-                isIn: [['supply and installation', 'installation', 'maintenance']]
-            }
         },
         team_id: {
             type: DataTypes.INTEGER,
@@ -42,6 +39,8 @@ Job.init(
                 model: Team,
                 key: 'id',
             },
+            onDelete: 'RESTRICT',
+            onUpdate: 'CASCADE',
         },
         customer_id: {
             type: DataTypes.INTEGER,
@@ -50,14 +49,25 @@ Job.init(
                 model: Customer,
                 key: 'id',
             },
+            onDelete: 'RESTRICT',
+            onUpdate: 'CASCADE',
         },
     },
     {
         sequelize,
         modelName: 'Job',
+        tableName: 'jobs',
         timestamps: true,
-        createdAt: true,
-        updatedAt: true,
+        indexes: [
+            {
+                name: 'jobs_team_id_fk',
+                fields: ['team_id'],
+            },
+            {
+                name: 'jobs_customer_id_fk',
+                fields: ['customer_id'],
+            },
+        ],
     }
 );
 

@@ -1,4 +1,4 @@
-import {Model, DataTypes, InferAttributes, InferCreationAttributes} from 'sequelize';
+import {Model, DataTypes} from 'sequelize';
 import sequelize from '../config/dbConfig';
 import User from "./user";
 import Team from "./team";
@@ -23,6 +23,8 @@ TeamAssignment.init(
                 model: Team,
                 key: 'id',
             },
+            onDelete: 'CASCADE',
+            onUpdate: 'CASCADE',
         },
         user_id: {
             type: DataTypes.UUID,
@@ -31,11 +33,25 @@ TeamAssignment.init(
                 model: User,
                 key: 'id',
             },
+            onDelete: 'CASCADE',
+            onUpdate: 'CASCADE',
         },
     },
     {
         sequelize,
         modelName: 'TeamAssignment',
+        tableName: 'team_assignments',
+        timestamps: false,
+        indexes: [
+            {
+                name: 'team_assignments_team_id_fk',
+                fields: ['team_id'],
+            },
+            {
+                name: 'team_assignments_user_id_fk',
+                fields: ['user_id'],
+            },
+        ],
     }
 );
 

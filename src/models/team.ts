@@ -1,4 +1,4 @@
-import {Model, DataTypes, InferAttributes, InferCreationAttributes} from 'sequelize';
+import {Model, DataTypes} from 'sequelize';
 import sequelize from '../config/dbConfig';
 import User from "./user";
 
@@ -41,9 +41,8 @@ Team.init(
     {
         sequelize,
         modelName: 'Team',
+        tableName: 'teams',
         timestamps: true,
-        createdAt: true,
-        updatedAt: true,
     }
 );
 

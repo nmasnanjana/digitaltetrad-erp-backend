@@ -14,7 +14,9 @@ const PORT = process.env.PORT || 4575;
 // Middleware
 app.use(cors({
     origin: 'http://localhost:3000',
-    credentials: true
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json());
 app.use('/api', webRoutes);
@@ -32,8 +34,8 @@ app.listen(PORT, async () => {
         logger.info("Model associations set up successfully.");
 
         // Sync models to database
-        await sequelize.sync({ alter: true }); // use { force: true } to drop and recreate tables
-        logger.info("Database synchronized successfully.");
+        // await sequelize.sync({ alter: true }); // use { force: true } to drop and recreate tables
+        // logger.info("Database synchronized successfully.");
     } catch (e: unknown) {
         if (e instanceof Error) {
             logger.error(e.message);

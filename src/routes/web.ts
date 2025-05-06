@@ -5,6 +5,8 @@ import teamAssignmentRoute from "./teamAssignmentRoute";
 import customerRoute from "./customerRoute";
 import jobRoute from "./jobRoute";
 import qcCommentRoute from "./qcCommentRoute";
+import expenseRoute from "./expenseRoute";
+import expenseTypeRoute from "./expenseTypeRoute";
 
 const router = express.Router();
 
@@ -14,5 +16,7 @@ router.use("/team-assignments", teamAssignmentRoute);
 router.use("/customers", customerRoute);
 router.use("/jobs", jobRoute);
 router.use("/qc-comments", qcCommentRoute);
+router.use("/expenses", expenseRoute);
+router.use("/expense-types", expenseTypeRoute);
 
 export default router;

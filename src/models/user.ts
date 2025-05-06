@@ -1,4 +1,4 @@
-import {Model, DataTypes, InferAttributes, InferCreationAttributes} from 'sequelize';
+import {Model, DataTypes} from 'sequelize';
 import sequelize from '../config/dbConfig';
 import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
@@ -66,20 +66,19 @@ User.init(
     {
         sequelize,
         modelName: 'User',
+        tableName: 'users',
         timestamps: true,
-        createdAt: true,
-        updatedAt: true,
     }
 );
 
 // Hash password before saving
 User.beforeCreate(async (user) => {
-    user.password = await bcrypt.hash(user.password, 10);
+    user.password = await bcrypt.hash(user.password, saltRounds);
 });
 
 User.beforeUpdate(async (user) => {
     if (user.changed('password')) {
-        user.password = await bcrypt.hash(user.password, 10);
+        user.password = await bcrypt.hash(user.password, saltRounds);
     }
 });
 

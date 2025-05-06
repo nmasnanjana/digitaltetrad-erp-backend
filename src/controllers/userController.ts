@@ -80,7 +80,7 @@ class UserController {
 
             const { id } = req.params;
             const user = await User.findByPk(id, {
-                attributes: ['id', 'firstName', 'lastName', 'username', 'role', 'email'],
+                attributes: ['id', 'firstName', 'lastName', 'username', 'role', 'email', 'isActive', 'lastLogin'],
             });
 
             if (!user) return res.status(404).send({error: 'User not found'});
@@ -187,8 +187,7 @@ class UserController {
     // login user
     static async userLogin(req:Request, res: Response): Promise<any> {
         try {
-
-            const { username, password } = req.body;
+            const { username, password, rememberMe } = req.body;
 
             // Check if user exists
             const user = await User.findOne({ where: { username } });
@@ -214,8 +213,9 @@ class UserController {
             user.lastLogin = new Date();
             await user.save();
 
-            // Generate JWT token
-            const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, { expiresIn: TOKEN_EXPIRY });
+            // Generate JWT token with different expiry based on remember me
+            const tokenExpiry = rememberMe ? "30d" : "1d";
+            const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, { expiresIn: tokenExpiry });
 
             logger.info(`User '${username}' logged in successfully`);
             return res.status(200).send({ token });
