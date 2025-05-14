@@ -26,6 +26,8 @@ Expense.belongsTo(ExpenseType, { foreignKey: 'expenses_type_id', as: 'expenseTyp
 Expense.belongsTo(Job, { foreignKey: 'job_id', as: 'job' });
 Expense.belongsTo(OperationType, { foreignKey: 'operation_type_id', as: 'operationType' });
 Expense.belongsTo(User, { foreignKey: 'edited_by', as: 'editor' });
+Expense.belongsTo(User, { foreignKey: 'reviewed_by', as: 'reviewer' });
+User.hasMany(Expense, { foreignKey: 'reviewed_by', as: 'reviewedExpenses' });
 
 // Purchase Order relationships
 PurchaseOrder.belongsTo(Job, { foreignKey: 'job_id', as: 'job' });

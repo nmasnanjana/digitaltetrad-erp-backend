@@ -15,6 +15,11 @@ class Expense extends Model {
     public amount!: number;
     public edited_by?: string;
     public reason_to_edit?: string;
+    public reviewed_by?: string;
+    public reviewer_comment?: string;
+    public status?: 'on_progress' | 'approved' | 'denied';
+    public reviewed_at?: Date;
+    public paid!: boolean;
 }
 
 Expense.init(
@@ -81,6 +86,34 @@ Expense.init(
             type: DataTypes.TEXT,
             allowNull: true,
         },
+        reviewed_by: {
+            type: DataTypes.UUID,
+            allowNull: true,
+            references: {
+                model: User,
+                key: 'id',
+            },
+            onDelete: 'RESTRICT',
+            onUpdate: 'CASCADE',
+        },
+        reviewer_comment: {
+            type: DataTypes.TEXT,
+            allowNull: true,
+        },
+        status: {
+            type: DataTypes.ENUM('on_progress', 'approved', 'denied'),
+            allowNull: true,
+            defaultValue: 'on_progress',
+        },
+        reviewed_at: {
+            type: DataTypes.DATE,
+            allowNull: true,
+        },
+        paid: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: false,
+        },
     },
     {
         sequelize,
@@ -103,6 +136,10 @@ Expense.init(
             {
                 name: 'expenses_edited_by_fk',
                 fields: ['edited_by'],
+            },
+            {
+                name: 'expenses_reviewed_by_fk',
+                fields: ['reviewed_by'],
             },
         ],
     }

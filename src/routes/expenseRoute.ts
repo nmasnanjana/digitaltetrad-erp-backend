@@ -11,4 +11,8 @@ router.post("/", ExpenseController.createExpense); // Create a new expense (requ
 router.put("/:id", ExpenseController.updateExpense); // Update an existing expense (requires all fields including edited_by and reason_to_edit)
 router.delete("/:id", ExpenseController.deleteExpense); // Delete an expense by ID
 
+// New routes for expense approval process
+router.post("/:id/review", ExpenseController.reviewExpense); // Review an expense (requires status, reviewer_comment, and reviewed_by)
+router.put("/:id/payment", ExpenseController.updatePaymentStatus); // Update payment status (requires paid field)
+
 export default router; 
