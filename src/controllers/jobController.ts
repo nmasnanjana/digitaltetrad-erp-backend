@@ -95,24 +95,53 @@ class JobController {
     static async updateJob(req: Request, res: Response): Promise<any> {
         try {
             const { id } = req.params;
-            const { name, type, team_id, customer_id } = req.body;
+            const { name, type, team_id, customer_id, status } = req.body;
 
             const job = await Job.findByPk(id);
             if (!job) {
                 return res.status(404).send({ error: 'Job not found' });
             }
 
-            // Validate required fields
-            if (!name || !type || !team_id || !customer_id) {
-                return res.status(400).send({ error: 'Required fields are missing' });
+            const updateData: any = {};
+
+            // Only validate and update fields that are provided
+            if (name !== undefined) {
+                if (!name) {
+                    return res.status(400).send({ error: 'Job name is required' });
+                }
+                updateData.name = name;
             }
 
-            await job.update({
-                name,
-                type,
-                team_id,
-                customer_id
-            });
+            if (type !== undefined) {
+                if (!type) {
+                    return res.status(400).send({ error: 'Job type is required' });
+                }
+                updateData.type = type;
+            }
+
+            if (team_id !== undefined) {
+                if (!team_id) {
+                    return res.status(400).send({ error: 'Team ID is required' });
+                }
+                updateData.team_id = team_id;
+            }
+
+            if (customer_id !== undefined) {
+                if (!customer_id) {
+                    return res.status(400).send({ error: 'Customer ID is required' });
+                }
+                updateData.customer_id = customer_id;
+            }
+
+            if (status !== undefined) {
+                updateData.status = status;
+                // If status is being updated to 'closed', set completed_at
+                if (status === 'closed' && job.status !== 'closed') {
+                    updateData.completed_at = new Date();
+                }
+            }
+
+            await job.update(updateData);
 
             // Fetch the updated job with all associations
             const updatedJob = await Job.findByPk(id, {

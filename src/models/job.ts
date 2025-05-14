@@ -8,6 +8,7 @@ class Job extends Model {
     declare type: 'supply and installation' | 'installation' | 'maintenance';
     declare team_id: number;
     declare customer_id: number;
+    declare completed_at: Date | null;
     declare createdAt: Date;
     declare updatedAt: Date;
 }
@@ -52,6 +53,10 @@ Job.init(
             },
             onDelete: 'RESTRICT',
             onUpdate: 'CASCADE',
+        },
+        completed_at: {
+            type: DataTypes.DATE,
+            allowNull: true,
         },
     },
     {
