@@ -6,42 +6,38 @@ class JobController {
     // Create a new job
     static async createJob(req: Request, res: Response): Promise<any> {
         try {
-            const { name, type, team_id, customer_id } = req.body;
+            const { id, name, type, team_id, customer_id } = req.body;
 
-            // Validate required fields
-            if (!name || !type || !team_id || !customer_id) {
-                const msg = "Name, type, team_id, and customer_id are required fields";
-                logger.warn(msg);
-                return res.status(400).send({error: msg});
+            // Check if job ID already exists
+            const existingJob = await Job.findByPk(id);
+            if (existingJob) {
+                return res.status(400).send({ error: 'Job ID already exists' });
             }
 
-            // Validate type enum
-            if (!['supply and installation', 'installation', 'maintenance'].includes(type)) {
-                const msg = "Invalid job type. Must be one of: 'supply and installation', 'installation', 'maintenance'";
-                logger.warn(msg);
-                return res.status(400).send({error: msg});
+            // Validate required fields
+            if (!id || !name || !type || !team_id || !customer_id) {
+                return res.status(400).send({ error: 'Required fields are missing' });
             }
 
             const newJob = await Job.create({
+                id,
                 name,
+                status: 'open',
                 type,
                 team_id,
-                customer_id,
-                status: 'open' // Default status
+                customer_id
             });
 
-            const msg = `New job created - ${newJob.name}`;
-            logger.info(msg);
-            return res.status(201).send({info: msg, job: newJob});
-
+            logger.info(`New job created with ID: ${newJob.id}`);
+            return res.status(201).json(newJob);
         } catch (e: unknown) {
             if (e instanceof Error) {
                 logger.error(e.message);
-                return res.status(500).send({error: e.message});
+                return res.status(500).send({ error: e.message });
             } else {
                 const msg = 'An unknown server error occurred while creating the job';
                 logger.error(msg);
-                return res.status(500).send({error: msg});
+                return res.status(500).send({ error: msg });
             }
         }
     }
@@ -51,25 +47,19 @@ class JobController {
         try {
             const jobs = await Job.findAll({
                 include: [
-                    {
-                        association: 'team',
-                        attributes: ['id', 'name', 'type']
-                    },
-                    {
-                        association: 'customer',
-                        attributes: ['id', 'name']
-                    }
+                    { model: Job.sequelize?.models.Team, as: 'team' },
+                    { model: Job.sequelize?.models.Customer, as: 'customer' }
                 ]
             });
             return res.status(200).json(jobs);
         } catch (e: unknown) {
             if (e instanceof Error) {
                 logger.error(e.message);
-                return res.status(500).send({error: e.message});
+                return res.status(500).send({ error: e.message });
             } else {
-                const msg = "An unknown server error occurred while fetching jobs";
+                const msg = 'An unknown server error occurred while fetching jobs';
                 logger.error(msg);
-                return res.status(500).send({error: msg});
+                return res.status(500).send({ error: msg });
             }
         }
     }
@@ -80,29 +70,23 @@ class JobController {
             const { id } = req.params;
             const job = await Job.findByPk(id, {
                 include: [
-                    {
-                        association: 'team',
-                        attributes: ['id', 'name', 'type']
-                    },
-                    {
-                        association: 'customer',
-                        attributes: ['id', 'name']
-                    }
+                    { model: Job.sequelize?.models.Team, as: 'team' },
+                    { model: Job.sequelize?.models.Customer, as: 'customer' }
                 ]
             });
 
             if (!job) {
-                return res.status(404).send({error: 'Job not found'});
+                return res.status(404).send({ error: 'Job not found' });
             }
             return res.status(200).json(job);
         } catch (e: unknown) {
             if (e instanceof Error) {
                 logger.error(e.message);
-                return res.status(500).send({error: e.message});
+                return res.status(500).send({ error: e.message });
             } else {
-                const msg = "An unknown server error occurred while fetching the job";
+                const msg = 'An unknown server error occurred while fetching the job';
                 logger.error(msg);
-                return res.status(500).send({error: msg});
+                return res.status(500).send({ error: msg });
             }
         }
     }
@@ -111,47 +95,43 @@ class JobController {
     static async updateJob(req: Request, res: Response): Promise<any> {
         try {
             const { id } = req.params;
-            const { name, status, type, team_id, customer_id } = req.body;
+            const { name, type, team_id, customer_id } = req.body;
 
             const job = await Job.findByPk(id);
             if (!job) {
-                return res.status(404).send({error: 'Job not found'});
+                return res.status(404).send({ error: 'Job not found' });
             }
 
-            // Validate status enum if provided
-            if (status && !['open', 'in progress', 'installed', 'qc', 'pat', 'closed'].includes(status)) {
-                const msg = "Invalid status. Must be one of: 'open', 'in progress', 'installed', 'qc', 'pat', 'closed'";
-                logger.warn(msg);
-                return res.status(400).send({error: msg});
-            }
-
-            // Validate type enum if provided
-            if (type && !['supply and installation', 'installation', 'maintenance'].includes(type)) {
-                const msg = "Invalid job type. Must be one of: 'supply and installation', 'installation', 'maintenance'";
-                logger.warn(msg);
-                return res.status(400).send({error: msg});
+            // Validate required fields
+            if (!name || !type || !team_id || !customer_id) {
+                return res.status(400).send({ error: 'Required fields are missing' });
             }
 
             await job.update({
                 name,
-                status,
                 type,
                 team_id,
                 customer_id
             });
 
-            const msg = `Job ${job.name} updated successfully`;
-            logger.info(msg);
-            return res.status(200).send({info: msg, job});
+            // Fetch the updated job with all associations
+            const updatedJob = await Job.findByPk(id, {
+                include: [
+                    { model: Job.sequelize?.models.Team, as: 'team' },
+                    { model: Job.sequelize?.models.Customer, as: 'customer' }
+                ]
+            });
 
+            logger.info(`Job ${id} updated successfully`);
+            return res.status(200).json(updatedJob);
         } catch (e: unknown) {
             if (e instanceof Error) {
                 logger.error(e.message);
-                return res.status(500).send({error: e.message});
+                return res.status(500).send({ error: e.message });
             } else {
-                const msg = "An unknown server error occurred while updating the job";
+                const msg = 'An unknown server error occurred while updating the job';
                 logger.error(msg);
-                return res.status(500).send({error: msg});
+                return res.status(500).send({ error: msg });
             }
         }
     }
@@ -163,22 +143,20 @@ class JobController {
             const job = await Job.findByPk(id);
 
             if (!job) {
-                return res.status(404).send({error: 'Job not found'});
+                return res.status(404).send({ error: 'Job not found' });
             }
 
             await job.destroy();
-            const msg = `Job ${job.name} deleted successfully`;
-            logger.info(msg);
-            return res.status(200).send({info: msg});
-
+            logger.info(`Job ${id} deleted successfully`);
+            return res.status(200).send({ info: 'Job deleted successfully' });
         } catch (e: unknown) {
             if (e instanceof Error) {
                 logger.error(e.message);
-                return res.status(500).send({error: e.message});
+                return res.status(500).send({ error: e.message });
             } else {
-                const msg = "An unknown server error occurred while deleting the job";
+                const msg = 'An unknown server error occurred while deleting the job';
                 logger.error(msg);
-                return res.status(500).send({error: msg});
+                return res.status(500).send({ error: msg });
             }
         }
     }
