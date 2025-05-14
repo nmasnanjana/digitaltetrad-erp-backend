@@ -3,11 +3,13 @@ import sequelize from '../config/dbConfig';
 import ExpenseType from './expenseType';
 import Job from './job';
 import User from './user';
+import OperationType from './operationType';
 
 class Expense extends Model {
     public id!: number;
     public expenses_type_id!: number;
     public operations!: boolean;
+    public operation_type_id?: number;
     public job_id?: number;
     public description!: string;
     public amount!: number;
@@ -36,6 +38,16 @@ Expense.init(
             type: DataTypes.BOOLEAN,
             allowNull: false,
             defaultValue: false,
+        },
+        operation_type_id: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            references: {
+                model: OperationType,
+                key: 'id',
+            },
+            onDelete: 'RESTRICT',
+            onUpdate: 'CASCADE',
         },
         job_id: {
             type: DataTypes.INTEGER,
@@ -79,6 +91,10 @@ Expense.init(
             {
                 name: 'expenses_type_id_fk',
                 fields: ['expenses_type_id'],
+            },
+            {
+                name: 'expenses_operation_type_id_fk',
+                fields: ['operation_type_id'],
             },
             {
                 name: 'expenses_job_id_fk',

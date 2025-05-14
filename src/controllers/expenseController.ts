@@ -9,6 +9,7 @@ class ExpenseController {
             const expenses = await Expense.findAll({
                 include: [
                     { model: Expense.sequelize?.models.ExpenseType, as: 'expenseType' },
+                    { model: Expense.sequelize?.models.OperationType, as: 'operationType' },
                     { model: Expense.sequelize?.models.Job, as: 'job' },
                     { model: Expense.sequelize?.models.User, as: 'editor' }
                 ]
@@ -33,6 +34,7 @@ class ExpenseController {
             const expense = await Expense.findByPk(id, {
                 include: [
                     { model: Expense.sequelize?.models.ExpenseType, as: 'expenseType' },
+                    { model: Expense.sequelize?.models.OperationType, as: 'operationType' },
                     { model: Expense.sequelize?.models.Job, as: 'job' },
                     { model: Expense.sequelize?.models.User, as: 'editor' }
                 ]
@@ -57,11 +59,16 @@ class ExpenseController {
     // Create new expense
     static async createExpense(req: Request, res: Response): Promise<any> {
         try {
-            const { expenses_type_id, operations, job_id, description, amount } = req.body;
+            const { expenses_type_id, operations, operation_type_id, job_id, description, amount } = req.body;
 
             // Validate required fields
             if (!expenses_type_id || !description || amount === undefined) {
                 return res.status(400).send({ error: 'Required fields are missing' });
+            }
+
+            // Validate operation_type_id requirement based on operations
+            if (operations && !operation_type_id) {
+                return res.status(400).send({ error: 'Operation Type ID is required when operations is true' });
             }
 
             // Validate job_id requirement based on operations
@@ -72,6 +79,7 @@ class ExpenseController {
             const newExpense = await Expense.create({
                 expenses_type_id,
                 operations,
+                operation_type_id: operations ? operation_type_id : null,
                 job_id: operations ? null : job_id,
                 description,
                 amount
@@ -95,7 +103,7 @@ class ExpenseController {
     static async updateExpense(req: Request, res: Response): Promise<any> {
         try {
             const { id } = req.params;
-            const { expenses_type_id, operations, job_id, description, amount, edited_by, reason_to_edit } = req.body;
+            const { expenses_type_id, operations, operation_type_id, job_id, description, amount, edited_by, reason_to_edit } = req.body;
 
             const expense = await Expense.findByPk(id);
             if (!expense) {
@@ -107,6 +115,11 @@ class ExpenseController {
                 return res.status(400).send({ error: 'Required fields are missing' });
             }
 
+            // Validate operation_type_id requirement based on operations
+            if (operations && !operation_type_id) {
+                return res.status(400).send({ error: 'Operation Type ID is required when operations is true' });
+            }
+
             // Validate job_id requirement based on operations
             if (!operations && !job_id) {
                 return res.status(400).send({ error: 'Job ID is required when operations is false' });
@@ -115,6 +128,7 @@ class ExpenseController {
             await expense.update({
                 expenses_type_id,
                 operations,
+                operation_type_id: operations ? operation_type_id : null,
                 job_id: operations ? null : job_id,
                 description,
                 amount,
@@ -126,6 +140,7 @@ class ExpenseController {
             const updatedExpense = await Expense.findByPk(id, {
                 include: [
                     { model: Expense.sequelize?.models.ExpenseType, as: 'expenseType' },
+                    { model: Expense.sequelize?.models.OperationType, as: 'operationType' },
                     { model: Expense.sequelize?.models.Job, as: 'job' },
                     { model: Expense.sequelize?.models.User, as: 'editor' }
                 ]
