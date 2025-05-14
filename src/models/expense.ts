@@ -10,7 +10,7 @@ class Expense extends Model {
     public expenses_type_id!: number;
     public operations!: boolean;
     public operation_type_id?: number;
-    public job_id?: number;
+    public job_id?: string;
     public description!: string;
     public amount!: number;
     public edited_by?: string;
@@ -50,7 +50,7 @@ Expense.init(
             onUpdate: 'CASCADE',
         },
         job_id: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.STRING,
             allowNull: true,
             references: {
                 model: Job,

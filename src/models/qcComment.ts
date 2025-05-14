@@ -5,8 +5,8 @@ import User from './user';
 
 class QCComment extends Model {
     public id!: number;
-    public job_id!: number;
-    public user_id!: string;
+    public job_id!: string;
+    public user_id!: number;
     public description!: string;
 }
 
@@ -18,7 +18,7 @@ QCComment.init(
             autoIncrement: true,
         },
         job_id: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.STRING,
             allowNull: false,
             references: {
                 model: Job,

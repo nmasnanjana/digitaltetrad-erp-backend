@@ -9,8 +9,8 @@ class TeamController {
             const { name, type, company, leader_id } = req.body;
 
             // Validate required fields
-            if (!name || !type || !leader_id) {
-                const msg = "Name, type, and leader_id are required fields";
+            if (!name || !type) {
+                const msg = "Name and type are required fields";
                 logger.warn(msg);
                 return res.status(400).send({error: msg});
             }
@@ -22,11 +22,18 @@ class TeamController {
                 return res.status(400).send({error: msg});
             }
 
+            // Validate leader_id for internal teams
+            if (type === 'internal' && !leader_id) {
+                const msg = "Team leader is required for internal teams";
+                logger.warn(msg);
+                return res.status(400).send({error: msg});
+            }
+
             const newTeam = await Team.create({
                 name,
                 type,
                 company,
-                leader_id
+                leader_id: type === 'internal' ? leader_id : null
             });
 
             const msg = `New team created - ${newTeam.name}`;
@@ -112,11 +119,18 @@ class TeamController {
                 return res.status(400).send({error: msg});
             }
 
+            // Validate leader_id for internal teams
+            if (type === 'internal' && !leader_id) {
+                const msg = "Team leader is required for internal teams";
+                logger.warn(msg);
+                return res.status(400).send({error: msg});
+            }
+
             await team.update({
                 name,
                 type,
                 company,
-                leader_id
+                leader_id: type === 'internal' ? leader_id : null
             });
 
             const msg = `Team ${team.name} updated successfully`;
