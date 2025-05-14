@@ -7,7 +7,7 @@ class Team extends Model {
     public name!: string;
     public type!: 'internal' | 'external';
     public company?: string;
-    public leader_id!: string;
+    public leader_id?: string;
 }
 
 Team.init(
@@ -31,7 +31,7 @@ Team.init(
         },
         leader_id: {
             type: DataTypes.UUID,
-            allowNull: false,
+            allowNull: true,
             references: {
                 model: User,
                 key: 'id',

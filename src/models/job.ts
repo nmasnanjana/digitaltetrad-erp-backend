@@ -1,23 +1,25 @@
 import {Model, DataTypes} from 'sequelize';
 import sequelize from '../config/dbConfig';
-import Team from './team';
-import Customer from './customer';
 
 class Job extends Model {
-    public id!: number;
-    public name!: string;
-    public status!: 'open' | 'in progress' | 'installed' | 'qc' | 'pat' | 'closed';
-    public type!: 'supply and installation' | 'installation' | 'maintenance';
-    public team_id!: number;
-    public customer_id!: number;
+    declare id: string;
+    declare name: string;
+    declare status: 'open' | 'in progress' | 'installed' | 'qc' | 'pat' | 'closed';
+    declare type: 'supply and installation' | 'installation' | 'maintenance';
+    declare team_id: number;
+    declare customer_id: number;
+    declare completed_at: Date | null;
+    declare createdAt: Date;
+    declare updatedAt: Date;
 }
 
 Job.init(
     {
         id: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.STRING,
             primaryKey: true,
-            autoIncrement: true,
+            allowNull: false,
+            unique: true,
         },
         name: {
             type: DataTypes.STRING,
@@ -36,7 +38,7 @@ Job.init(
             type: DataTypes.INTEGER,
             allowNull: false,
             references: {
-                model: Team,
+                model: 'teams',
                 key: 'id',
             },
             onDelete: 'RESTRICT',
@@ -46,11 +48,15 @@ Job.init(
             type: DataTypes.INTEGER,
             allowNull: false,
             references: {
-                model: Customer,
+                model: 'customers',
                 key: 'id',
             },
             onDelete: 'RESTRICT',
             onUpdate: 'CASCADE',
+        },
+        completed_at: {
+            type: DataTypes.DATE,
+            allowNull: true,
         },
     },
     {

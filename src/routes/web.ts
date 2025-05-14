@@ -7,6 +7,7 @@ import jobRoute from "./jobRoute";
 import qcCommentRoute from "./qcCommentRoute";
 import expenseRoute from "./expenseRoute";
 import expenseTypeRoute from "./expenseTypeRoute";
+import operationTypeRoute from "./operationTypeRoute";
 
 const router = express.Router();
 
@@ -18,5 +19,6 @@ router.use("/jobs", jobRoute);
 router.use("/qc-comments", qcCommentRoute);
 router.use("/expenses", expenseRoute);
 router.use("/expense-types", expenseTypeRoute);
+router.use("/operation-types", operationTypeRoute);
 
 export default router;

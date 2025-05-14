@@ -5,7 +5,7 @@ import User from './user';
 
 class PurchaseOrder extends Model {
     public id!: number;
-    public job_id!: number;
+    public job_id!: string;
     public po_number!: string;
     public amount!: number;
     public status!: string;
@@ -20,7 +20,7 @@ PurchaseOrder.init(
             autoIncrement: true,
         },
         job_id: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.STRING,
             allowNull: false,
             references: {
                 model: Job,

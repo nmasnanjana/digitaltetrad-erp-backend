@@ -9,8 +9,10 @@ class ExpenseController {
             const expenses = await Expense.findAll({
                 include: [
                     { model: Expense.sequelize?.models.ExpenseType, as: 'expenseType' },
+                    { model: Expense.sequelize?.models.OperationType, as: 'operationType' },
                     { model: Expense.sequelize?.models.Job, as: 'job' },
-                    { model: Expense.sequelize?.models.User, as: 'editor' }
+                    { model: Expense.sequelize?.models.User, as: 'editor' },
+                    { model: Expense.sequelize?.models.User, as: 'reviewer' }
                 ]
             });
             return res.status(200).json(expenses);
@@ -33,8 +35,10 @@ class ExpenseController {
             const expense = await Expense.findByPk(id, {
                 include: [
                     { model: Expense.sequelize?.models.ExpenseType, as: 'expenseType' },
+                    { model: Expense.sequelize?.models.OperationType, as: 'operationType' },
                     { model: Expense.sequelize?.models.Job, as: 'job' },
-                    { model: Expense.sequelize?.models.User, as: 'editor' }
+                    { model: Expense.sequelize?.models.User, as: 'editor' },
+                    { model: Expense.sequelize?.models.User, as: 'reviewer' }
                 ]
             });
 
@@ -57,11 +61,16 @@ class ExpenseController {
     // Create new expense
     static async createExpense(req: Request, res: Response): Promise<any> {
         try {
-            const { expenses_type_id, operations, job_id, description, amount } = req.body;
+            const { expenses_type_id, operations, operation_type_id, job_id, description, amount } = req.body;
 
             // Validate required fields
             if (!expenses_type_id || !description || amount === undefined) {
                 return res.status(400).send({ error: 'Required fields are missing' });
+            }
+
+            // Validate operation_type_id requirement based on operations
+            if (operations && !operation_type_id) {
+                return res.status(400).send({ error: 'Operation Type ID is required when operations is true' });
             }
 
             // Validate job_id requirement based on operations
@@ -72,9 +81,11 @@ class ExpenseController {
             const newExpense = await Expense.create({
                 expenses_type_id,
                 operations,
+                operation_type_id: operations ? operation_type_id : null,
                 job_id: operations ? null : job_id,
                 description,
-                amount
+                amount,
+                status: !operations ? 'on_progress' : null // Set status to on_progress for job-related expenses
             });
 
             logger.info(`New expense created with ID: ${newExpense.id}`);
@@ -95,11 +106,16 @@ class ExpenseController {
     static async updateExpense(req: Request, res: Response): Promise<any> {
         try {
             const { id } = req.params;
-            const { expenses_type_id, operations, job_id, description, amount, edited_by, reason_to_edit } = req.body;
+            const { expenses_type_id, operations, operation_type_id, job_id, description, amount, edited_by, reason_to_edit } = req.body;
 
             const expense = await Expense.findByPk(id);
             if (!expense) {
                 return res.status(404).send({ error: 'Expense not found' });
+            }
+
+            // Check if expense is approved
+            if (expense.status === 'approved') {
+                return res.status(400).send({ error: 'Cannot edit an approved expense' });
             }
 
             // Validate required fields
@@ -107,27 +123,39 @@ class ExpenseController {
                 return res.status(400).send({ error: 'Required fields are missing' });
             }
 
+            // Validate operation_type_id requirement based on operations
+            if (operations && !operation_type_id) {
+                return res.status(400).send({ error: 'Operation Type ID is required when operations is true' });
+            }
+
             // Validate job_id requirement based on operations
             if (!operations && !job_id) {
                 return res.status(400).send({ error: 'Job ID is required when operations is false' });
             }
 
+            // Reset status to on_progress if expense was denied
+            const newStatus = expense.status === 'denied' ? 'on_progress' : expense.status;
+
             await expense.update({
                 expenses_type_id,
                 operations,
+                operation_type_id: operations ? operation_type_id : null,
                 job_id: operations ? null : job_id,
                 description,
                 amount,
                 edited_by,
-                reason_to_edit
+                reason_to_edit,
+                status: newStatus
             });
 
             // Fetch the updated expense with all associations
             const updatedExpense = await Expense.findByPk(id, {
                 include: [
                     { model: Expense.sequelize?.models.ExpenseType, as: 'expenseType' },
+                    { model: Expense.sequelize?.models.OperationType, as: 'operationType' },
                     { model: Expense.sequelize?.models.Job, as: 'job' },
-                    { model: Expense.sequelize?.models.User, as: 'editor' }
+                    { model: Expense.sequelize?.models.User, as: 'editor' },
+                    { model: Expense.sequelize?.models.User, as: 'reviewer' }
                 ]
             });
 
@@ -155,6 +183,11 @@ class ExpenseController {
                 return res.status(404).send({ error: 'Expense not found' });
             }
 
+            // Prevent deletion of approved expenses
+            if (expense.status === 'approved') {
+                return res.status(400).send({ error: 'Cannot delete an approved expense' });
+            }
+
             await expense.destroy();
             logger.info(`Expense ${id} deleted successfully`);
             return res.status(200).send({ info: 'Expense deleted successfully' });
@@ -164,6 +197,126 @@ class ExpenseController {
                 return res.status(500).send({ error: e.message });
             } else {
                 const msg = 'An unknown server error occurred while deleting the expense';
+                logger.error(msg);
+                return res.status(500).send({ error: msg });
+            }
+        }
+    }
+
+    // Get expenses by job ID
+    static async getExpensesByJob(req: Request, res: Response): Promise<any> {
+        try {
+            const { jobId } = req.params;
+            const expenses = await Expense.findAll({
+                where: { job_id: jobId },
+                include: [
+                    { model: Expense.sequelize?.models.ExpenseType, as: 'expenseType' },
+                    { model: Expense.sequelize?.models.OperationType, as: 'operationType' },
+                    { model: Expense.sequelize?.models.Job, as: 'job' },
+                    { model: Expense.sequelize?.models.User, as: 'editor' },
+                    { model: Expense.sequelize?.models.User, as: 'reviewer' }
+                ]
+            });
+            return res.status(200).json(expenses);
+        } catch (e: unknown) {
+            if (e instanceof Error) {
+                logger.error(e.message);
+                return res.status(500).send({ error: e.message });
+            } else {
+                const msg = 'An unknown server error occurred while fetching expenses for the job';
+                logger.error(msg);
+                return res.status(500).send({ error: msg });
+            }
+        }
+    }
+
+    // Review expense
+    static async reviewExpense(req: Request, res: Response): Promise<any> {
+        try {
+            const { id } = req.params;
+            const { status, reviewer_comment, reviewed_by } = req.body;
+
+            if (!status || !reviewed_by) {
+                return res.status(400).send({ error: 'Status and reviewer are required' });
+            }
+
+            const expense = await Expense.findByPk(id);
+            if (!expense) {
+                return res.status(404).send({ error: 'Expense not found' });
+            }
+
+            // Only job-related expenses can be reviewed
+            if (expense.operations) {
+                return res.status(400).send({ error: 'Only job-related expenses can be reviewed' });
+            }
+
+            await expense.update({
+                status,
+                reviewer_comment,
+                reviewed_by,
+                reviewed_at: new Date()
+            });
+
+            const updatedExpense = await Expense.findByPk(id, {
+                include: [
+                    { model: Expense.sequelize?.models.ExpenseType, as: 'expenseType' },
+                    { model: Expense.sequelize?.models.OperationType, as: 'operationType' },
+                    { model: Expense.sequelize?.models.Job, as: 'job' },
+                    { model: Expense.sequelize?.models.User, as: 'editor' },
+                    { model: Expense.sequelize?.models.User, as: 'reviewer' }
+                ]
+            });
+
+            logger.info(`Expense ${id} reviewed with status: ${status}`);
+            return res.status(200).json(updatedExpense);
+        } catch (e: unknown) {
+            if (e instanceof Error) {
+                logger.error(e.message);
+                return res.status(500).send({ error: e.message });
+            } else {
+                const msg = 'An unknown server error occurred while reviewing the expense';
+                logger.error(msg);
+                return res.status(500).send({ error: msg });
+            }
+        }
+    }
+
+    // Update expense payment status
+    static async updatePaymentStatus(req: Request, res: Response): Promise<any> {
+        try {
+            const { id } = req.params;
+            const { paid } = req.body;
+
+            const expense = await Expense.findByPk(id);
+            if (!expense) {
+                return res.status(404).send({ error: 'Expense not found' });
+            }
+
+            // Only approved expenses can be marked as paid
+            if (expense.status !== 'approved') {
+                return res.status(400).send({ error: 'Only approved expenses can be marked as paid' });
+            }
+
+            await expense.update({ paid });
+
+            const updatedExpense = await Expense.findByPk(id, {
+                include: [
+                    { model: Expense.sequelize?.models.ExpenseType, as: 'expenseType' },
+                    { model: Expense.sequelize?.models.OperationType, as: 'operationType' },
+                    { model: Expense.sequelize?.models.Job, as: 'job' },
+                    { model: Expense.sequelize?.models.User, as: 'editor' },
+                    { model: Expense.sequelize?.models.User, as: 'reviewer' }
+                ]
+            });
+
+            logger.info(`Expense ${id} payment status updated to: ${paid}`);
+            return res.status(200).json(updatedExpense);
+        } catch (e: unknown) {
+            if (e instanceof Error) {
+                logger.error(e.message);
+                return res.status(500).send({ error: e.message });
+            } else {
+                const msg = 'An unknown server error occurred while updating payment status';
                 logger.error(msg);
                 return res.status(500).send({ error: msg });
             }
