@@ -6,7 +6,7 @@ import User from './user';
 class QCComment extends Model {
     public id!: number;
     public job_id!: string;
-    public user_id!: number;
+    public user_id!: string;
     public description!: string;
 }
 

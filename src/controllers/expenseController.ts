@@ -184,6 +184,32 @@ class ExpenseController {
             }
         }
     }
+
+    // Get expenses by job ID
+    static async getExpensesByJob(req: Request, res: Response): Promise<any> {
+        try {
+            const { jobId } = req.params;
+            const expenses = await Expense.findAll({
+                where: { job_id: jobId },
+                include: [
+                    { model: Expense.sequelize?.models.ExpenseType, as: 'expenseType' },
+                    { model: Expense.sequelize?.models.OperationType, as: 'operationType' },
+                    { model: Expense.sequelize?.models.Job, as: 'job' },
+                    { model: Expense.sequelize?.models.User, as: 'editor' }
+                ]
+            });
+            return res.status(200).json(expenses);
+        } catch (e: unknown) {
+            if (e instanceof Error) {
+                logger.error(e.message);
+                return res.status(500).send({ error: e.message });
+            } else {
+                const msg = 'An unknown server error occurred while fetching expenses for the job';
+                logger.error(msg);
+                return res.status(500).send({ error: msg });
+            }
+        }
+    }
 }
 
 export default ExpenseController; 
