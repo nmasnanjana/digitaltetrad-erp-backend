@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { Op } from 'sequelize';
 import Expense from '../models/expense';
 import logger from '../utils/logger';
 
@@ -6,7 +7,60 @@ class ExpenseController {
     // List all expenses
     static async getAllExpenses(req: Request, res: Response): Promise<any> {
         try {
+            const {
+                createdStartDate,
+                createdEndDate,
+                expenseTypeId,
+                operations,
+                jobId,
+                operationTypeId,
+                status
+            } = req.query;
+
+            const where: any = {};
+
+            // Handle date filters
+            if (createdStartDate || createdEndDate) {
+                where.createdAt = {};
+                if (createdStartDate) {
+                    const startDate = new Date(createdStartDate as string);
+                    startDate.setHours(0, 0, 0, 0);
+                    where.createdAt[Op.gte] = startDate;
+                }
+                if (createdEndDate) {
+                    const endDate = new Date(createdEndDate as string);
+                    endDate.setHours(23, 59, 59, 999);
+                    where.createdAt[Op.lte] = endDate;
+                }
+            }
+
+            // Handle expense type filter
+            if (expenseTypeId) {
+                where.expenses_type_id = expenseTypeId;
+            }
+
+            // Handle category filter (job/operation)
+            if (operations !== undefined) {
+                where.operations = operations === 'true';
+            }
+
+            // Handle job filter
+            if (jobId) {
+                where.job_id = jobId;
+            }
+
+            // Handle operation type filter
+            if (operationTypeId) {
+                where.operation_type_id = operationTypeId;
+            }
+
+            // Handle status filter
+            if (status) {
+                where.status = status;
+            }
+
             const expenses = await Expense.findAll({
+                where,
                 include: [
                     { model: Expense.sequelize?.models.ExpenseType, as: 'expenseType' },
                     { model: Expense.sequelize?.models.OperationType, as: 'operationType' },
