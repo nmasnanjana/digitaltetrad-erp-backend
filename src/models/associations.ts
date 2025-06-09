@@ -9,6 +9,7 @@ import PurchaseOrder from "./purchaseOrder";
 import QcComment from "./qcComment";
 import OperationType from "./operationType";
 import Role from "./role";
+import Inventory from "./inventory";
 
 // Role-User relationship
 User.belongsTo(Role, { foreignKey: 'roleId', as: 'role' });
@@ -25,6 +26,10 @@ Job.belongsTo(Team, { foreignKey: 'team_id', as: 'team' });
 Job.belongsTo(Customer, { foreignKey: 'customer_id', as: 'customer' });
 Team.hasMany(Job, { foreignKey: 'team_id', as: 'jobs' });
 Customer.hasMany(Job, { foreignKey: 'customer_id', as: 'jobs' });
+
+// Inventory relationships
+Inventory.belongsTo(Job, { foreignKey: 'jobId', as: 'job' });
+Job.hasMany(Inventory, { foreignKey: 'jobId', as: 'inventory' });
 
 // Expense relationships
 Expense.belongsTo(ExpenseType, { foreignKey: 'expenses_type_id', as: 'expenseType' });
@@ -49,4 +54,4 @@ User.hasMany(QcComment, { foreignKey: 'user_id', as: 'qcComments' });
 // Export setup in case needed
 export const setupAssociations = () => {};
 
-export { User, Role };
+export { User, Role, Inventory };

@@ -9,6 +9,7 @@ import expenseRoute from "./expenseRoute";
 import expenseTypeRoute from "./expenseTypeRoute";
 import operationTypeRoute from "./operationTypeRoute";
 import roleRoute from "./roleRoute";
+import inventoryRoute from "./inventoryRoute";
 
 const router = express.Router();
 
@@ -22,5 +23,6 @@ router.use("/expenses", expenseRoute);
 router.use("/expense-types", expenseTypeRoute);
 router.use("/operation-types", operationTypeRoute);
 router.use("/roles", roleRoute);
+router.use("/inventory", inventoryRoute);
 
 export default router;
