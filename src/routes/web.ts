@@ -8,6 +8,7 @@ import qcCommentRoute from "./qcCommentRoute";
 import expenseRoute from "./expenseRoute";
 import expenseTypeRoute from "./expenseTypeRoute";
 import operationTypeRoute from "./operationTypeRoute";
+import roleRoute from "./roleRoute";
 
 const router = express.Router();
 
@@ -20,5 +21,6 @@ router.use("/qc-comments", qcCommentRoute);
 router.use("/expenses", expenseRoute);
 router.use("/expense-types", expenseTypeRoute);
 router.use("/operation-types", operationTypeRoute);
+router.use("/roles", roleRoute);
 
 export default router;
