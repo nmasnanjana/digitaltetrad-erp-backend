@@ -12,7 +12,7 @@ class User extends Model {
     public lastName!: string;
     public username!: string;
     public password!: string;
-    public role!: 'admin' | 'user' | 'viewer' | 'developer';
+    public roleId!: string;
     public email?: string;
     public isActive!: boolean;
     public lastLogin?: Date;
@@ -42,9 +42,13 @@ User.init(
             type: DataTypes.STRING,
             allowNull: false,
         },
-        role: {
-            type: DataTypes.ENUM('admin', 'user', 'viewer', 'developer'),
+        roleId: {
+            type: DataTypes.UUID,
             allowNull: false,
+            references: {
+                model: 'roles',
+                key: 'id'
+            }
         },
         email: {
             type: DataTypes.STRING,

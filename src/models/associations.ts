@@ -8,6 +8,11 @@ import ExpenseType from "./expenseType";
 import PurchaseOrder from "./purchaseOrder";
 import QcComment from "./qcComment";
 import OperationType from "./operationType";
+import Role from "./role";
+
+// Role-User relationship
+User.belongsTo(Role, { foreignKey: 'roleId', as: 'role' });
+Role.hasMany(User, { foreignKey: 'roleId', as: 'users' });
 
 // Core Team-User relationships
 User.belongsToMany(Team, { through: TeamAssignment, foreignKey: 'user_id', otherKey: 'team_id', as: 'teams' });
@@ -43,3 +48,5 @@ User.hasMany(QcComment, { foreignKey: 'user_id', as: 'qcComments' });
 
 // Export setup in case needed
 export const setupAssociations = () => {};
+
+export { User, Role };

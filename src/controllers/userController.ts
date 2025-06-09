@@ -4,6 +4,7 @@ import logger from "../utils/logger";
 import bcrypt = require("bcryptjs");
 import dotenv from 'dotenv';
 import jwt from "jsonwebtoken";
+import Role from "../models/role";
 
 dotenv.config();
 
@@ -14,10 +15,10 @@ class UserController {
     // create a new user
     static async createUser (req: Request, res: Response): Promise<any> {
         try {
-            const { firstName, lastName, username, password, password_confirmation, role, email } = req.body;
+            const { firstName, lastName, username, password, password_confirmation, roleId, email } = req.body;
             let hashPassword;
 
-            if (firstName == undefined || username == undefined || password == undefined || password_confirmation == undefined || role == undefined) {
+            if (firstName == undefined || username == undefined || password == undefined || password_confirmation == undefined || roleId == undefined) {
                 let msg:string = "One or more user fields required to register a user is absent"
                 logger.warn(msg);
                 return res.status(400).send({error: msg});
@@ -30,7 +31,7 @@ class UserController {
                     username: username,
                     password: password,
                     email: email,
-                    role: role,
+                    roleId: roleId,
                 });
 
                 let msg:string = `new user created - ${newUser.firstName} ${newUser.lastName ?? ""}`;
@@ -58,7 +59,12 @@ class UserController {
     static async getAllUsers(req: Request, res: Response): Promise<any> {
         try {
             const users = await User.findAll({
-                attributes: ['id', 'firstName', 'lastName', 'username', 'role', 'email', 'isActive', 'lastLogin'],
+                attributes: ['id', 'firstName', 'lastName', 'username', 'roleId', 'email', 'isActive', 'lastLogin'],
+                include: [{
+                    model: Role,
+                    as: 'role',
+                    attributes: ['name']
+                }]
             });
 
             return res.status(200).json(users);
@@ -77,10 +83,14 @@ class UserController {
     // get user by id
     static async getUserByID(req:Request, res: Response): Promise<any> {
         try {
-
             const { id } = req.params;
             const user = await User.findByPk(id, {
-                attributes: ['id', 'firstName', 'lastName', 'username', 'role', 'email', 'isActive', 'lastLogin'],
+                attributes: ['id', 'firstName', 'lastName', 'username', 'roleId', 'email', 'isActive', 'lastLogin'],
+                include: [{
+                    model: Role,
+                    as: 'role',
+                    attributes: ['name']
+                }]
             });
 
             if (!user) return res.status(404).send({error: 'User not found'});
@@ -126,7 +136,7 @@ class UserController {
     static async updateUserByID(req:Request, res: Response): Promise<any> {
         try {
             const {id} = req.params;
-            const { firstName, lastName, username, role, email } = req.body;
+            const { firstName, lastName, username, roleId, email } = req.body;
 
             const user = await User.findByPk(id)
             if (!user) return res.status(404).send({error: 'User not found'})
@@ -135,7 +145,7 @@ class UserController {
                 firstName: firstName,
                 lastName: lastName,
                 username: username,
-                role: role,
+                roleId: roleId,
                 email: email,
             });
 
@@ -215,10 +225,23 @@ class UserController {
 
             // Generate JWT token with different expiry based on remember me
             const tokenExpiry = rememberMe ? "30d" : "1d";
-            const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, { expiresIn: tokenExpiry });
+            const token = jwt.sign({ id: user.id, roleId: user.roleId }, JWT_SECRET, { expiresIn: tokenExpiry });
 
             logger.info(`User '${username}' logged in successfully`);
-            return res.status(200).send({ token });
+            logger.info(`Token payload: ${JSON.stringify({ id: user.id, roleId: user.roleId })}`);
+            
+            return res.status(200).send({ 
+                token,
+                user: {
+                    id: user.id,
+                    firstName: user.firstName,
+                    lastName: user.lastName,
+                    username: user.username,
+                    email: user.email,
+                    roleId: user.roleId,
+                    isActive: user.isActive
+                }
+            });
 
         } catch (e: unknown) {
             if (e instanceof Error) {
