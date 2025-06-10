@@ -5,6 +5,7 @@ import bcrypt = require("bcryptjs");
 import dotenv from 'dotenv';
 import jwt from "jsonwebtoken";
 import Role from "../models/role";
+import Permission from "../models/permission";
 
 dotenv.config();
 
@@ -195,7 +196,7 @@ class UserController {
     }
 
     // login user
-    static async userLogin(req:Request, res: Response): Promise<any> {
+    static async userLogin(req: Request, res: Response): Promise<void> {
         try {
             const { username, password, rememberMe } = req.body;
 
@@ -203,20 +204,23 @@ class UserController {
             const user = await User.findOne({ where: { username } });
             if (!user) {
                 logger.warn(`Login attempt failed: User '${username}' not found`);
-                return res.status(404).send({ error: "Username or Password is incorrect" });
+                res.status(404).json({ error: "Username or Password is incorrect" });
+                return;
             }
 
             // Check if user is active
             if (!user.isActive) {
                 logger.warn(`Inactive user '${username}' attempted to log in`);
-                return res.status(403).send({ error: "Account is inactive. Contact the system administrator." });
+                res.status(403).json({ error: "Account is inactive. Contact the system administrator." });
+                return;
             }
 
             // Check password
             const passwordMatch = await bcrypt.compare(password, user.password);
             if (!passwordMatch) {
                 logger.warn(`Invalid login attempt for user '${username}'`);
-                return res.status(404).send({ error: "Username or Password is incorrect" });
+                res.status(404).json({ error: "Username or Password is incorrect" });
+                return;
             }
 
             // Update last login time
@@ -227,11 +231,22 @@ class UserController {
             const tokenExpiry = rememberMe ? "30d" : "1d";
             const token = jwt.sign({ id: user.id, roleId: user.roleId }, JWT_SECRET, { expiresIn: tokenExpiry });
 
+            // Set cookie options
+            const cookieOptions = {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict' as const,
+                maxAge: rememberMe ? 30 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000 // 30 days or 1 day
+            };
+
+            // Set the token in cookie
+            res.cookie('token', token, cookieOptions);
+
             logger.info(`User '${username}' logged in successfully`);
             logger.info(`Token payload: ${JSON.stringify({ id: user.id, roleId: user.roleId })}`);
             
-            return res.status(200).send({ 
-                token,
+            res.status(200).json({ 
+                token, // Include token in response
                 user: {
                     id: user.id,
                     firstName: user.firstName,
@@ -242,16 +257,9 @@ class UserController {
                     isActive: user.isActive
                 }
             });
-
-        } catch (e: unknown) {
-            if (e instanceof Error) {
-                logger.error(e.message);
-                return res.status(500).send({error: e.message});
-            } else  {
-                let msg:string = "An unknown Server error occurred while trying to login"
-                logger.error(msg);
-                return res.status(500).send({error: msg});
-            }
+        } catch (error) {
+            logger.error("Login error:", error);
+            res.status(500).json({ error: "Internal server error" });
         }
     }
 
@@ -280,6 +288,55 @@ class UserController {
                 logger.error(msg);
                 return res.status(500).send({error: msg});
             }
+        }
+    }
+
+    static async getCurrentUser(req: Request, res: Response): Promise<void> {
+        try {
+            // Get user ID from the session or JWT token
+            const userId = req.user?.id;
+            
+            if (!userId) {
+                res.status(401).json({ message: "Not authenticated" });
+                return;
+            }
+
+            // Get user with role and permissions
+            const user = await User.findByPk(userId, {
+                include: [{
+                    model: Role,
+                    as: 'role',
+                    include: [{
+                        model: Permission,
+                        as: 'permissions',
+                        where: { isActive: true },
+                        required: false
+                    }]
+                }]
+            });
+
+            if (!user) {
+                res.status(404).json({ message: "User not found" });
+                return;
+            }
+
+            // Return user data without sensitive information
+            const userData = {
+                id: user.id,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                username: user.username,
+                email: user.email,
+                roleId: user.roleId,
+                role: user.role,
+                isActive: user.isActive,
+                lastLogin: user.lastLogin
+            };
+
+            res.json(userData);
+        } catch (error) {
+            logger.error("Error getting current user:", error);
+            res.status(500).json({ message: "Internal server error" });
         }
     }
 
