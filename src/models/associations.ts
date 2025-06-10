@@ -10,10 +10,16 @@ import QcComment from "./qcComment";
 import OperationType from "./operationType";
 import Role from "./role";
 import Inventory from "./inventory";
+import Permission from "./permission";
+import RolePermission from "./rolePermission";
 
 // Role-User relationship
 User.belongsTo(Role, { foreignKey: 'roleId', as: 'role' });
 Role.hasMany(User, { foreignKey: 'roleId', as: 'users' });
+
+// Role-Permission relationship
+Role.belongsToMany(Permission, { through: RolePermission, foreignKey: 'roleId', otherKey: 'permissionId', as: 'permissions' });
+Permission.belongsToMany(Role, { through: RolePermission, foreignKey: 'permissionId', otherKey: 'roleId', as: 'roles' });
 
 // Core Team-User relationships
 User.belongsToMany(Team, { through: TeamAssignment, foreignKey: 'user_id', otherKey: 'team_id', as: 'teams' });
@@ -54,4 +60,4 @@ User.hasMany(QcComment, { foreignKey: 'user_id', as: 'qcComments' });
 // Export setup in case needed
 export const setupAssociations = () => {};
 
-export { User, Role, Inventory };
+export { User, Role, Inventory, Permission, RolePermission };
