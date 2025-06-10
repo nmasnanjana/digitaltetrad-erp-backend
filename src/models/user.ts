@@ -2,11 +2,34 @@ import {Model, DataTypes} from 'sequelize';
 import sequelize from '../config/dbConfig';
 import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
+import Role from './role';
 
 dotenv.config();
 const saltRounds = parseInt(process.env.SALT_ROUNDS || '10', 10);
 
-class User extends Model {
+interface UserAttributes {
+    id: string;
+    firstName: string;
+    lastName: string;
+    username: string;
+    password: string;
+    roleId: string;
+    email?: string;
+    isActive: boolean;
+    lastLogin?: Date;
+}
+
+interface UserCreationAttributes extends Omit<UserAttributes, 'id' | 'lastLogin' | 'isActive'> {
+    id?: string;
+    lastLogin?: Date;
+    isActive?: boolean;
+}
+
+interface UserInstance extends Model<UserAttributes, UserCreationAttributes>, UserAttributes {
+    role?: Role;
+}
+
+class User extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes {
     public id!: string;
     public firstName!: string;
     public lastName!: string;
@@ -16,6 +39,7 @@ class User extends Model {
     public email?: string;
     public isActive!: boolean;
     public lastLogin?: Date;
+    public role?: Role;
 }
 
 User.init(

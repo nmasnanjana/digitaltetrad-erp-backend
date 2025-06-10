@@ -1,10 +1,22 @@
 import { Model, DataTypes } from 'sequelize';
 import sequelize from '../config/dbConfig';
+import Permission from './permission';
 
-class Role extends Model {
+interface RoleAttributes {
+    id?: string;
+    name: string;
+    description?: string;
+    isActive: boolean;
+}
+
+interface RoleInstance extends Model<RoleAttributes>, RoleAttributes {
+    permissions?: Permission[];
+}
+
+class Role extends Model<RoleAttributes, RoleAttributes> implements RoleAttributes {
     public id!: string;
     public name!: string;
-    public description?: string;
+    public description!: string;
     public isActive!: boolean;
 }
 
