@@ -74,8 +74,8 @@ const startServer = async () => {
         logger.info("Model associations set up successfully.");
 
         // Sync models to database first
-        await sequelize.sync({ alter: true }); // use { force: true } to drop and recreate tables
-        logger.info("Database synchronized successfully.");
+        // await sequelize.sync({ alter: true }); // use { force: true } to drop and recreate tables
+        // logger.info("Database synchronized successfully.");
 
         // Then scan and sync permissions
         const scanner = new PermissionScanner();
