@@ -105,9 +105,9 @@ class HuaweiPoController {
             }
 
             // Create directory structure
-            const uploadDir = path.join(__dirname, '../../huawei', job_id);
+            const uploadDir = path.join(__dirname, '../../media/huawei', job_id);
             const date = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
-            const jobDateDir = path.join(uploadDir, date);
+            const jobDateDir = path.join(uploadDir, date, 'po');
             
             if (!fs.existsSync(uploadDir)) {
                 fs.mkdirSync(uploadDir, { recursive: true });
