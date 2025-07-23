@@ -4,22 +4,28 @@ import { checkPermission } from "../middleware/checkPermission";
 
 const router = express.Router();
 
-// Create a new Huawei invoice
-router.post("/", checkPermission("huaweiinvoice", "create"), HuaweiInvoiceController.createHuaweiInvoice);
+// Create invoice records
+router.post("/", checkPermission("huaweiinvoice", "create"), HuaweiInvoiceController.createInvoice);
 
-// Get all Huawei invoices
-router.get("/", checkPermission("huaweiinvoice", "read"), HuaweiInvoiceController.getAllHuaweiInvoices);
+// Get all invoices
+router.get("/", checkPermission("huaweiinvoice", "read"), HuaweiInvoiceController.getAllInvoices);
 
-// Get Huawei invoice by ID
-router.get("/:id", checkPermission("huaweiinvoice", "read"), HuaweiInvoiceController.getHuaweiInvoiceByID);
+// Get invoice summaries
+router.get("/summaries", checkPermission("huaweiinvoice", "read"), HuaweiInvoiceController.getInvoiceSummaries);
 
-// Get Huawei invoices by invoice number
-router.get("/invoice/:invoice_no", checkPermission("huaweiinvoice", "read"), HuaweiInvoiceController.getHuaweiInvoicesByInvoiceNo);
+// Get invoice by ID
+router.get("/:id", checkPermission("huaweiinvoice", "read"), HuaweiInvoiceController.getInvoiceById);
 
-// Update a Huawei invoice
-router.put("/:id", checkPermission("huaweiinvoice", "update"), HuaweiInvoiceController.updateHuaweiInvoiceByID);
+// Get invoices by invoice number
+router.get("/invoice/:invoice_no", checkPermission("huaweiinvoice", "read"), HuaweiInvoiceController.getInvoicesByInvoiceNo);
 
-// Delete a Huawei invoice
-router.delete("/:id", checkPermission("huaweiinvoice", "delete"), HuaweiInvoiceController.deleteHuaweiInvoiceByID);
+// Update invoice by ID
+router.put("/:id", checkPermission("huaweiinvoice", "update"), HuaweiInvoiceController.updateInvoiceById);
+
+// Delete invoice by ID
+router.delete("/:id", checkPermission("huaweiinvoice", "delete"), HuaweiInvoiceController.deleteInvoiceById);
+
+// Delete all invoices by invoice number
+router.delete("/invoice/:invoice_no", checkPermission("huaweiinvoice", "delete"), HuaweiInvoiceController.deleteInvoicesByInvoiceNo);
 
 export default router; 
