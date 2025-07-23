@@ -12,6 +12,7 @@ import Role from "./role";
 import Inventory from "./inventory";
 import Permission from "./permission";
 import RolePermission from "./rolePermission";
+import HuaweiPo from "./huaweiPo";
 
 // Role-User relationship
 User.belongsTo(Role, { foreignKey: 'roleId', as: 'role' });
@@ -56,6 +57,14 @@ QcComment.belongsTo(Job, { foreignKey: 'job_id', as: 'job' });
 QcComment.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
 Job.hasMany(QcComment, { foreignKey: 'job_id', as: 'qcComments' });
 User.hasMany(QcComment, { foreignKey: 'user_id', as: 'qcComments' });
+
+// Huawei PO relationships - TEMPORARILY DISABLED
+HuaweiPo.belongsTo(Job, { foreignKey: 'job_id', as: 'job' });
+HuaweiPo.belongsTo(Customer, { foreignKey: 'customer_id', as: 'customer' });
+HuaweiPo.belongsTo(User, { foreignKey: 'uploaded_by', as: 'uploader' });
+Job.hasMany(HuaweiPo, { foreignKey: 'job_id', as: 'huaweiPos' });
+Customer.hasMany(HuaweiPo, { foreignKey: 'customer_id', as: 'huaweiPos' });
+User.hasMany(HuaweiPo, { foreignKey: 'uploaded_by', as: 'uploadedHuaweiPos' });
 
 // Export setup in case needed
 export const setupAssociations = () => {};

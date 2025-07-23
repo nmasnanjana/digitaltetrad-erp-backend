@@ -11,6 +11,7 @@ import operationTypeRoute from "./operationTypeRoute";
 import roleRoute from "./roleRoute";
 import inventoryRoute from "./inventoryRoute";
 import permissionRoute from "./permissionRoutes";
+import huaweiPoRoute from "./huaweiPoRoute";
 import { checkPermission } from "../middleware/checkPermission";
 import { authenticate } from "../middleware/auth";
 import UserController from "../controllers/userController";
@@ -33,5 +34,6 @@ router.use("/operation-types", authenticate, operationTypeRoute);
 router.use("/roles", authenticate, roleRoute);
 router.use("/inventory", authenticate, inventoryRoute);
 router.use("/permissions", authenticate, permissionRoute);
+router.use("/huawei-pos", authenticate, huaweiPoRoute);
 
 export default router;

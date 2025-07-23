@@ -25,6 +25,41 @@ app.use(cors({
 app.use(express.json());
 app.use('/api', webRoutes);
 
+// Custom sync function to handle tables individually
+async function customSync() {
+    try {
+        const queryInterface = sequelize.getQueryInterface();
+        
+        // Get all table names
+        const tables = await queryInterface.showAllTables();
+        logger.info(`Found ${tables.length} existing tables`);
+        
+        // Check if huawei_pos table exists
+        const huaweiPosExists = tables.includes('huawei_pos');
+        
+        if (!huaweiPosExists) {
+            logger.info('Creating huawei_pos table...');
+            
+            // Try selective sync for new tables only
+            await sequelize.sync({ 
+                alter: false, 
+                force: false,
+                match: /huawei_pos/ 
+            });
+            logger.info('huawei_pos table created successfully via selective sync');
+        } else {
+            logger.info('huawei_pos table already exists');
+        }
+        
+        // For existing tables, don't alter them to avoid index issues
+        logger.info('Skipping alteration of existing tables to preserve indexes');
+        
+    } catch (error) {
+        logger.error('Error in custom sync:', error);
+        throw error;
+    }
+}
+
 // Function to create developer role and assign permissions
 async function setupDeveloperRole() {
     try {
@@ -73,9 +108,9 @@ const startServer = async () => {
         setupAssociations();
         logger.info("Model associations set up successfully.");
 
-        // Sync models to database first
-        // await sequelize.sync({ alter: true }); // use { force: true } to drop and recreate tables
-        // logger.info("Database synchronized successfully.");
+        // Use custom sync to avoid index issues
+        // await customSync();
+        // logger.info("Database synchronized successfully using custom sync.");
 
         // Then scan and sync permissions
         const scanner = new PermissionScanner();
@@ -99,11 +134,7 @@ const startServer = async () => {
             }
         });
     } catch (e: unknown) {
-        if (e instanceof Error) {
-            logger.error(e.message);
-        } else {
-            logger.error('An unknown error occurred');
-        }
+        logger.error('Error starting server:', e);
         process.exit(1);
     }
 };
