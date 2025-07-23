@@ -63,6 +63,11 @@ router.get("/job/:job_id",
     HuaweiPoController.getHuaweiPosByJobID
 );
 
+router.delete("/job/:job_id", 
+    checkPermission('huaweipo', 'delete'),
+    HuaweiPoController.deleteHuaweiPosByJobID
+);
+
 router.get("/customer/:customer_id", 
     checkPermission('huaweipo', 'read'),
     HuaweiPoController.getHuaweiPosByCustomerID

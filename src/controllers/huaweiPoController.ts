@@ -458,6 +458,67 @@ class HuaweiPoController {
         }
     }
 
+    // delete all huawei POs by job_id (including files)
+    static async deleteHuaweiPosByJobID(req: Request, res: Response): Promise<any> {
+        try {
+            const { job_id } = req.params;
+            const deletedBy = req.user?.id;
+
+            // Get all records for this job to find file paths
+            const huaweiPos = await HuaweiPo.findAll({
+                where: { job_id },
+                attributes: ['id', 'file_path', 'po_no', 'item_code']
+            });
+
+            if (huaweiPos.length === 0) {
+                return res.status(404).send({error: 'No Huawei PO data found for this job'});
+            }
+
+            // Get file path from first record (all records should have same file path)
+            const filePath = huaweiPos[0].file_path;
+            
+            // Delete the physical file if it exists
+            if (filePath) {
+                const fullFilePath = path.join(__dirname, '../../', filePath);
+                if (fs.existsSync(fullFilePath)) {
+                    fs.unlinkSync(fullFilePath);
+                    logger.info(`Deleted file: ${fullFilePath} for job ${job_id}`);
+                }
+            }
+
+            // Delete all database records for this job
+            const deletedCount = await HuaweiPo.destroy({ where: { job_id } });
+
+            // Log the deletion
+            const poNumbers = huaweiPos.map(po => po.po_no).join(', ');
+            const itemCodes = huaweiPos.map(po => po.item_code).join(', ');
+            
+            const msg = `User ${deletedBy} deleted ${deletedCount} Huawei PO records for job ${job_id}. PO Numbers: ${poNumbers}. Item Codes: ${itemCodes}. File: ${filePath}`;
+            logger.info(msg);
+
+            return res.status(200).send({
+                info: `Successfully deleted ${deletedCount} Huawei PO records and associated file for job ${job_id}`,
+                data: {
+                    job_id,
+                    records_deleted: deletedCount,
+                    file_deleted: filePath,
+                    deleted_by: deletedBy,
+                    deleted_at: new Date()
+                }
+            });
+
+        } catch (e: unknown) {
+            if (e instanceof Error) {
+                logger.error(e.message);
+                return res.status(500).send({error: e.message});
+            } else {
+                const msg = "An unknown Server error occurred while deleting Huawei POs by job";
+                logger.error(msg);
+                return res.status(500).send({error: msg});
+            }
+        }
+    }
+
     // get huawei POs by customer_id
     static async getHuaweiPosByCustomerID(req: Request, res: Response): Promise<any> {
         try {
