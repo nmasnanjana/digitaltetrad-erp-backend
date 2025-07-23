@@ -26,60 +26,60 @@ const upload = multer({
 // File upload route
 router.post("/upload", 
     upload.single('excel_file'), 
-    checkPermission('huawei_po', 'upload'),
+    checkPermission('huaweipo', 'uploadexcelfile'),
     HuaweiPoController.uploadExcelFile
 );
 
 // Get file info
 router.get("/file-info/:job_id", 
-    checkPermission('huawei_po', 'read'),
+    checkPermission('huaweipo', 'read'),
     HuaweiPoController.getFileInfo
 );
 
 // Download file
 router.get("/download/:job_id", 
-    checkPermission('huawei_po', 'download'),
+    checkPermission('huaweipo', 'downloadexcelfile'),
     HuaweiPoController.downloadExcelFile
 );
 
 // CRUD routes
 router.post("/", 
-    checkPermission('huawei_po', 'create'),
+    checkPermission('huaweipo', 'create'),
     HuaweiPoController.createHuaweiPo
 );
 
 router.get("/", 
-    checkPermission('huawei_po', 'read'),
+    checkPermission('huaweipo', 'read'),
     HuaweiPoController.getAllHuaweiPos
 );
 
 router.get("/:id", 
-    checkPermission('huawei_po', 'read'),
+    checkPermission('huaweipo', 'read'),
     HuaweiPoController.getHuaweiPoByID
 );
 
 router.get("/job/:job_id", 
-    checkPermission('huawei_po', 'read'),
+    checkPermission('huaweipo', 'read'),
     HuaweiPoController.getHuaweiPosByJobID
 );
 
 router.get("/customer/:customer_id", 
-    checkPermission('huawei_po', 'read'),
+    checkPermission('huaweipo', 'read'),
     HuaweiPoController.getHuaweiPosByCustomerID
 );
 
 router.get("/po/:po_no", 
-    checkPermission('huawei_po', 'read'),
+    checkPermission('huaweipo', 'read'),
     HuaweiPoController.getHuaweiPosByPONumber
 );
 
 router.put("/:id", 
-    checkPermission('huawei_po', 'update'),
+    checkPermission('huaweipo', 'update'),
     HuaweiPoController.updateHuaweiPoByID
 );
 
 router.delete("/:id", 
-    checkPermission('huawei_po', 'delete'),
+    checkPermission('huaweipo', 'delete'),
     HuaweiPoController.deleteHuaweiPoByID
 );
 

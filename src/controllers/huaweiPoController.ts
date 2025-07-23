@@ -142,10 +142,37 @@ class HuaweiPoController {
             const workbook = XLSX.readFile(filePath);
             const sheetName = workbook.SheetNames[0];
             const worksheet = workbook.Sheets[sheetName];
-            const data = XLSX.utils.sheet_to_json(worksheet);
+            const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
-            if (data.length === 0) {
+            if (jsonData.length === 0) {
                 const msg = "Excel file is empty or has no valid data";
+                logger.warn(msg);
+                return res.status(400).send({error: msg});
+            }
+
+            // Extract headers from first row
+            const headers = jsonData[0] as string[];
+            
+            // Find column indices for the expected columns
+            const columnMap = {
+                site_code: headers.findIndex(h => h?.toLowerCase().includes('site code')),
+                site_id: headers.findIndex(h => h?.toLowerCase().includes('site id')),
+                site_name: headers.findIndex(h => h?.toLowerCase().includes('site name')),
+                po_no: headers.findIndex(h => h?.toLowerCase().includes('po no')),
+                line_no: headers.findIndex(h => h?.toLowerCase().includes('po line no')),
+                item_code: headers.findIndex(h => h?.toLowerCase().includes('item code')),
+                item_description: headers.findIndex(h => h?.toLowerCase().includes('item description')),
+                unit_price: headers.findIndex(h => h?.toLowerCase().includes('unit price')),
+                requested_quantity: headers.findIndex(h => h?.toLowerCase().includes('requested qty')),
+            };
+
+            // Validate that we found all required columns
+            const missingColumns = Object.entries(columnMap)
+                .filter(([key, index]) => index === -1)
+                .map(([key]) => key);
+
+            if (missingColumns.length > 0) {
+                const msg = `Missing required columns: ${missingColumns.join(', ')}`;
                 logger.warn(msg);
                 return res.status(400).send({error: msg});
             }
@@ -153,31 +180,45 @@ class HuaweiPoController {
             // Delete existing records for this job
             await HuaweiPo.destroy({ where: { job_id } });
 
-            // Process and insert data
+            // Process and insert data (skip header row)
             const huaweiPoRecords = [];
-            for (const row of data) {
-                const record: any = row;
+            for (let i = 1; i < jsonData.length; i++) {
+                const row = jsonData[i] as any[];
                 
-                // Validate required fields in Excel
-                if (!record.site_code || !record.site_id || !record.site_name || 
-                    !record.po_no || !record.line_no || !record.item_code || 
-                    !record.item_description || record.unit_price === undefined || 
-                    record.requested_quantity === undefined) {
+                // Skip empty rows
+                if (!row || row.every(cell => cell === undefined || cell === null || cell === '')) {
+                    continue;
+                }
+
+                // Extract values using column indices
+                const site_code = row[columnMap.site_code]?.toString() || '';
+                const site_id = row[columnMap.site_id]?.toString() || '';
+                const site_name = row[columnMap.site_name]?.toString() || '';
+                const po_no = row[columnMap.po_no]?.toString() || '';
+                const line_no = row[columnMap.line_no]?.toString() || '';
+                const item_code = row[columnMap.item_code]?.toString() || '';
+                const item_description = row[columnMap.item_description]?.toString() || '';
+                const unit_price = parseFloat(row[columnMap.unit_price]) || 0;
+                const requested_quantity = parseInt(row[columnMap.requested_quantity]) || 0;
+
+                // Validate required fields
+                if (!site_code || !site_id || !site_name || !po_no || !line_no || 
+                    !item_code || !item_description || unit_price === 0 || requested_quantity === 0) {
                     continue; // Skip invalid rows
                 }
 
                 huaweiPoRecords.push({
                     job_id,
                     customer_id,
-                    site_code: record.site_code.toString(),
-                    site_id: record.site_id.toString(),
-                    site_name: record.site_name.toString(),
-                    po_no: record.po_no.toString(),
-                    line_no: record.line_no.toString(),
-                    item_code: record.item_code.toString(),
-                    item_description: record.item_description.toString(),
-                    unit_price: parseFloat(record.unit_price) || 0,
-                    requested_quantity: parseInt(record.requested_quantity) || 0,
+                    site_code,
+                    site_id,
+                    site_name,
+                    po_no,
+                    line_no,
+                    item_code,
+                    item_description,
+                    unit_price,
+                    requested_quantity,
                     file_path: relativePath,
                     uploaded_at: new Date(),
                     uploaded_by: uploadedBy
