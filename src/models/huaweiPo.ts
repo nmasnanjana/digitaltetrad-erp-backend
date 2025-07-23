@@ -14,6 +14,7 @@ interface HuaweiPoAttributes {
     item_description: string;
     unit_price: number;
     requested_quantity: number;
+    invoiced_percentage: number;
     file_path?: string;
     uploaded_at?: Date;
     uploaded_by?: string;
@@ -36,6 +37,7 @@ class HuaweiPo extends Model<HuaweiPoAttributes, HuaweiPoCreationAttributes> imp
     public item_description!: string;
     public unit_price!: number;
     public requested_quantity!: number;
+    public invoiced_percentage!: number;
     public file_path?: string;
     public uploaded_at?: Date;
     public uploaded_by?: string;
@@ -99,6 +101,15 @@ HuaweiPo.init(
         requested_quantity: {
             type: DataTypes.INTEGER,
             allowNull: false,
+        },
+        invoiced_percentage: {
+            type: DataTypes.DECIMAL(5, 2),
+            allowNull: false,
+            defaultValue: 0,
+            validate: {
+                min: 0,
+                max: 100
+            }
         },
         file_path: {
             type: DataTypes.STRING,

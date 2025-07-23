@@ -13,6 +13,7 @@ import Inventory from "./inventory";
 import Permission from "./permission";
 import RolePermission from "./rolePermission";
 import HuaweiPo from "./huaweiPo";
+import HuaweiInvoice from "./huaweiInvoice";
 
 // Role-User relationship
 User.belongsTo(Role, { foreignKey: 'roleId', as: 'role' });
@@ -65,6 +66,10 @@ HuaweiPo.belongsTo(User, { foreignKey: 'uploaded_by', as: 'uploader' });
 Job.hasMany(HuaweiPo, { foreignKey: 'job_id', as: 'huaweiPos' });
 Customer.hasMany(HuaweiPo, { foreignKey: 'customer_id', as: 'huaweiPos' });
 User.hasMany(HuaweiPo, { foreignKey: 'uploaded_by', as: 'uploadedHuaweiPos' });
+
+// Huawei Invoice relationships
+HuaweiInvoice.belongsTo(HuaweiPo, { foreignKey: 'huawei_po_id', as: 'huaweiPo' });
+HuaweiPo.hasOne(HuaweiInvoice, { foreignKey: 'huawei_po_id', as: 'huaweiInvoice' });
 
 // Export setup in case needed
 export const setupAssociations = () => {};

@@ -55,7 +55,8 @@ class HuaweiPoController {
                 item_code,
                 item_description,
                 unit_price,
-                requested_quantity
+                requested_quantity,
+                invoiced_percentage: 0
             });
 
             const msg = `New Huawei PO created - PO: ${newHuaweiPo.po_no}, Item: ${newHuaweiPo.item_code}`;
@@ -219,6 +220,7 @@ class HuaweiPoController {
                     item_description,
                     unit_price,
                     requested_quantity,
+                    invoiced_percentage: 0,
                     file_path: relativePath,
                     uploaded_at: new Date(),
                     uploaded_by: uploadedBy

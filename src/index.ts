@@ -36,23 +36,41 @@ async function customSync() {
         
         // Check if huawei_pos table exists
         const huaweiPosExists = tables.includes('huawei_pos');
+        const huaweiInvoicesExists = tables.includes('huawei_invoices');
         
         if (!huaweiPosExists) {
             logger.info('Creating huawei_pos table...');
             
-            // Try selective sync for new tables only
-            await sequelize.sync({ 
-                alter: false, 
-                force: false,
-                match: /huawei_pos/ 
-            });
-            logger.info('huawei_pos table created successfully via selective sync');
+            // Import and sync HuaweiPo model specifically
+            const HuaweiPo = require('./models/huaweiPo').default;
+            await HuaweiPo.sync({ force: false });
+            logger.info('huawei_pos table created successfully');
         } else {
-            logger.info('huawei_pos table already exists');
+            logger.info('huawei_pos table exists, syncing to add missing columns...');
+            
+            // Import and sync HuaweiPo model to add missing columns
+            const HuaweiPo = require('./models/huaweiPo').default;
+            await HuaweiPo.sync({ alter: true });
+            logger.info('huawei_pos table synced successfully');
+        }
+
+        if (!huaweiInvoicesExists) {
+            logger.info('Creating huawei_invoices table...');
+            
+            // Import and sync HuaweiInvoice model specifically
+            const HuaweiInvoice = require('./models/huaweiInvoice').default;
+            await HuaweiInvoice.sync({ force: false });
+            logger.info('huawei_invoices table created successfully');
+        } else {
+            logger.info('huawei_invoices table exists, syncing to add missing columns...');
+            
+            // Import and sync HuaweiInvoice model to add missing columns
+            const HuaweiInvoice = require('./models/huaweiInvoice').default;
+            await HuaweiInvoice.sync({ alter: true });
+            logger.info('huawei_invoices table synced successfully');
         }
         
-        // For existing tables, don't alter them to avoid index issues
-        logger.info('Skipping alteration of existing tables to preserve indexes');
+        logger.info('Custom sync completed successfully');
         
     } catch (error) {
         logger.error('Error in custom sync:', error);
