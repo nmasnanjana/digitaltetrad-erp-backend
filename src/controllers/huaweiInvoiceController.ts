@@ -35,19 +35,20 @@ class HuaweiInvoiceController {
                     continue;
                 }
 
-                // Check if invoice already exists for this PO
-                const existingInvoice = await HuaweiInvoice.findOne({
-                    where: { huawei_po_id }
-                });
-
-                if (existingInvoice) {
-                    errors.push(`Invoice already exists for PO ${huaweiPo.po_no}, Line ${huaweiPo.line_no}`);
-                    continue;
-                }
-
                 // Validate percentage
                 if (invoiced_percentage < 0 || invoiced_percentage > 100) {
                     errors.push(`Invalid percentage ${invoiced_percentage}% for PO ${huaweiPo.po_no}, Line ${huaweiPo.line_no}`);
+                    continue;
+                }
+
+                // Check if total invoiced percentage would exceed 100%
+                const currentInvoicedStr = huaweiPo.invoiced_percentage;
+                const currentInvoiced = typeof currentInvoicedStr === 'string' ? parseFloat(currentInvoicedStr) : 
+                                       typeof currentInvoicedStr === 'number' ? currentInvoicedStr : 0;
+                const newTotalInvoiced = currentInvoiced + invoiced_percentage;
+                
+                if (newTotalInvoiced > 100) {
+                    errors.push(`Cannot invoice ${invoiced_percentage}% for PO ${huaweiPo.po_no}, Line ${huaweiPo.line_no}. Already invoiced ${currentInvoiced}%, total would exceed 100% (${newTotalInvoiced}%)`);
                     continue;
                 }
 
@@ -59,11 +60,6 @@ class HuaweiInvoiceController {
                 });
 
                 // Update the PO's invoiced_percentage - handle decimal string conversion
-                const currentInvoicedStr = huaweiPo.invoiced_percentage;
-                const currentInvoiced = typeof currentInvoicedStr === 'string' ? parseFloat(currentInvoicedStr) : 
-                                       typeof currentInvoicedStr === 'number' ? currentInvoicedStr : 0;
-                const newTotalInvoiced = currentInvoiced + invoiced_percentage;
-                
                 console.log(`Updating PO ${huaweiPo.po_no}, Line ${huaweiPo.line_no}:`, {
                     current_invoiced: currentInvoicedStr,
                     current_invoiced_parsed: currentInvoiced,
