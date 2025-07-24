@@ -2,6 +2,7 @@ import {Request, Response} from "express";
 import HuaweiInvoice from "../models/huaweiInvoice";
 import HuaweiPo from "../models/huaweiPo";
 import Job from "../models/job";
+import Customer from "../models/customer";
 import { Op } from "sequelize";
 import logger from "../utils/logger";
 
@@ -117,13 +118,41 @@ class HuaweiInvoiceController {
                             {
                                 model: Job,
                                 as: 'job',
-                                attributes: ['id', 'name']
+                                attributes: ['id', 'name'],
+                                include: [
+                                    {
+                                        model: Customer,
+                                        as: 'customer',
+                                        attributes: ['id', 'name']
+                                    }
+                                ]
                             }
                         ]
                     }
                 ],
                 order: [['createdAt', 'DESC']]
             });
+
+            // Debug logging
+            if (invoices.length > 0) {
+                const firstInvoice = invoices[0] as any;
+                logger.info('First invoice structure:', {
+                    invoice_id: firstInvoice.id,
+                    huawei_po: firstInvoice.huaweiPo ? {
+                        id: firstInvoice.huaweiPo.id,
+                        job_id: firstInvoice.huaweiPo.job_id
+                    } : null,
+                    job: firstInvoice.huaweiPo?.job ? {
+                        id: firstInvoice.huaweiPo.job.id,
+                        name: firstInvoice.huaweiPo.job.name,
+                        customer_id: firstInvoice.huaweiPo.job.customer_id
+                    } : null,
+                    customer: firstInvoice.huaweiPo?.job?.customer ? {
+                        id: firstInvoice.huaweiPo.job.customer.id,
+                        name: firstInvoice.huaweiPo.job.customer.name
+                    } : null
+                });
+            }
 
             return res.status(200).json(invoices);
         } catch (e: unknown) {
