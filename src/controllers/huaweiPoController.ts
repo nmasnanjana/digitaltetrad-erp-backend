@@ -466,14 +466,32 @@ class HuaweiPoController {
             const { job_id } = req.params;
             const deletedBy = req.user?.id;
 
-            // Get all records for this job to find file paths
+            // Get all records for this job to find file paths and check invoiced status
             const huaweiPos = await HuaweiPo.findAll({
                 where: { job_id },
-                attributes: ['id', 'file_path', 'po_no', 'item_code']
+                attributes: ['id', 'file_path', 'po_no', 'item_code', 'line_no', 'invoiced_percentage']
             });
 
             if (huaweiPos.length === 0) {
                 return res.status(404).send({error: 'No Huawei PO data found for this job'});
+            }
+
+            // Check if any PO has been invoiced
+            const invoicedPos = huaweiPos.filter(po => {
+                const invoicedStr = po.invoiced_percentage;
+                const invoiced = typeof invoicedStr === 'string' ? parseFloat(invoicedStr) : 
+                                typeof invoicedStr === 'number' ? invoicedStr : 0;
+                return invoiced > 0;
+            });
+
+            if (invoicedPos.length > 0) {
+                const invoicedDetails = invoicedPos.map(po => 
+                    `${po.po_no} (Line ${po.line_no}) - ${po.invoiced_percentage}% invoiced`
+                ).join(', ');
+                
+                const msg = `Cannot delete Huawei PO data for job ${job_id} - the following PO records have been invoiced and cannot be deleted: ${invoicedDetails}. PO records with invoices cannot be deleted to maintain data integrity.`;
+                logger.warn(msg);
+                return res.status(400).send({error: msg});
             }
 
             // Get file path from first record (all records should have same file path)
@@ -581,6 +599,17 @@ class HuaweiPoController {
             const huaweiPo = await HuaweiPo.findByPk(id);
             if (!huaweiPo) return res.status(404).send({error: 'Huawei PO not found'});
 
+            // Check if PO has been invoiced - if so, prevent updates
+            const currentInvoicedStr = huaweiPo.invoiced_percentage;
+            const currentInvoiced = typeof currentInvoicedStr === 'string' ? parseFloat(currentInvoicedStr) : 
+                                   typeof currentInvoicedStr === 'number' ? currentInvoicedStr : 0;
+            
+            if (currentInvoiced > 0) {
+                const msg = `Cannot update PO ${huaweiPo.po_no}, Line ${huaweiPo.line_no} - it has been invoiced (${currentInvoiced}%). PO records with invoices cannot be modified to maintain data integrity.`;
+                logger.warn(msg);
+                return res.status(400).send({error: msg});
+            }
+
             await huaweiPo.update({
                 job_id: job_id || huaweiPo.job_id,
                 customer_id: customer_id || huaweiPo.customer_id,
@@ -619,6 +648,17 @@ class HuaweiPoController {
             const huaweiPo = await HuaweiPo.findByPk(id);
 
             if (!huaweiPo) return res.status(404).send({error: 'Huawei PO not found'});
+            
+            // Check if PO has been invoiced - if so, prevent deletion
+            const currentInvoicedStr = huaweiPo.invoiced_percentage;
+            const currentInvoiced = typeof currentInvoicedStr === 'string' ? parseFloat(currentInvoicedStr) : 
+                                   typeof currentInvoicedStr === 'number' ? currentInvoicedStr : 0;
+            
+            if (currentInvoiced > 0) {
+                const msg = `Cannot delete PO ${huaweiPo.po_no}, Line ${huaweiPo.line_no} - it has been invoiced (${currentInvoiced}%). PO records with invoices cannot be deleted to maintain data integrity.`;
+                logger.warn(msg);
+                return res.status(400).send({error: msg});
+            }
             
             const poNo = huaweiPo.po_no;
             const itemCode = huaweiPo.item_code;
