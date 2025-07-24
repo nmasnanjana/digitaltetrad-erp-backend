@@ -69,6 +69,44 @@ async function customSync() {
             await HuaweiInvoice.sync({ alter: true });
             logger.info('huawei_invoices table synced successfully');
         }
+
+        // Check if settings table exists
+        const settingsExists = tables.includes('settings');
+        
+        if (!settingsExists) {
+            logger.info('Creating settings table...');
+            
+            // Import and sync Settings model specifically
+            const Settings = require('./models/settings').default;
+            await Settings.sync({ force: false });
+            logger.info('settings table created successfully');
+        } else {
+            logger.info('settings table exists, syncing to add missing columns...');
+            
+            // Import and sync Settings model to add missing columns
+            const Settings = require('./models/settings').default;
+            await Settings.sync({ alter: true });
+            logger.info('settings table synced successfully');
+        }
+
+        // Check if customers table exists and sync to add address column
+        const customersExists = tables.includes('customers');
+        
+        if (customersExists) {
+            logger.info('customers table exists, syncing to add address column...');
+            
+            // Import and sync Customer model to add missing columns
+            const Customer = require('./models/customer').default;
+            await Customer.sync({ alter: true });
+            logger.info('customers table synced successfully');
+        } else {
+            logger.info('Creating customers table...');
+            
+            // Import and sync Customer model specifically
+            const Customer = require('./models/customer').default;
+            await Customer.sync({ force: false });
+            logger.info('customers table created successfully');
+        }
         
         logger.info('Custom sync completed successfully');
         

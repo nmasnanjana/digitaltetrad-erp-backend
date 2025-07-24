@@ -4,6 +4,7 @@ import sequelize from '../config/dbConfig';
 class Customer extends Model {
     public id!: number;
     public name!: string;
+    public address?: string;
 }
 
 Customer.init(
@@ -16,6 +17,11 @@ Customer.init(
         name: {
             type: DataTypes.STRING,
             allowNull: false,
+        },
+        address: {
+            type: DataTypes.TEXT,
+            allowNull: true,
+            comment: 'Multi-line address for the customer'
         },
     },
     {
