@@ -60,11 +60,13 @@ class HuaweiInvoiceController {
                 });
 
                 // Update the PO's invoiced_percentage - handle decimal string conversion
-                console.log(`Updating PO ${huaweiPo.po_no}, Line ${huaweiPo.line_no}:`, {
+                logger.info(`Updating PO ${huaweiPo.po_no}, Line ${huaweiPo.line_no}`, {
                     current_invoiced: currentInvoicedStr,
                     current_invoiced_parsed: currentInvoiced,
                     new_invoice_percentage: invoiced_percentage,
-                    new_total_invoiced: newTotalInvoiced
+                    new_total_invoiced: newTotalInvoiced,
+                    po_id: huaweiPo.id,
+                    invoice_no: invoice_no
                 });
                 
                 await huaweiPo.update({ invoiced_percentage: newTotalInvoiced });
@@ -325,11 +327,13 @@ class HuaweiInvoiceController {
                                        typeof currentInvoicedStr === 'number' ? currentInvoicedStr : 0;
                 const newTotalInvoiced = Math.max(0, currentInvoiced - invoice.invoiced_percentage);
                 
-                console.log(`Reducing PO ${huaweiPo.po_no}, Line ${huaweiPo.line_no}:`, {
+                logger.info(`Reducing PO ${huaweiPo.po_no}, Line ${huaweiPo.line_no}`, {
                     current_invoiced: currentInvoicedStr,
                     current_invoiced_parsed: currentInvoiced,
                     invoice_percentage: invoice.invoiced_percentage,
-                    new_total_invoiced: newTotalInvoiced
+                    new_total_invoiced: newTotalInvoiced,
+                    po_id: huaweiPo.id,
+                    invoice_no: invoiceNo
                 });
                 
                 await huaweiPo.update({ invoiced_percentage: newTotalInvoiced });
@@ -384,11 +388,13 @@ class HuaweiInvoiceController {
                                            typeof currentInvoicedStr === 'number' ? currentInvoicedStr : 0;
                     const newTotalInvoiced = Math.max(0, currentInvoiced - invoice.invoiced_percentage);
                     
-                    console.log(`Bulk delete - Reducing PO ${huaweiPo.po_no}, Line ${huaweiPo.line_no}:`, {
+                    logger.info(`Bulk delete - Reducing PO ${huaweiPo.po_no}, Line ${huaweiPo.line_no}`, {
                         current_invoiced: currentInvoicedStr,
                         current_invoiced_parsed: currentInvoiced,
                         invoice_percentage: invoice.invoiced_percentage,
-                        new_total_invoiced: newTotalInvoiced
+                        new_total_invoiced: newTotalInvoiced,
+                        po_id: huaweiPo.id,
+                        invoice_no: invoice.invoice_no
                     });
                     
                     await huaweiPo.update({ invoiced_percentage: newTotalInvoiced });
