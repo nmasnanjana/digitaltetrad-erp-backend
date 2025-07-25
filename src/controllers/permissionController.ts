@@ -1,0 +1,104 @@
+import { Request, Response } from 'express';
+import Permission from '../models/permission';
+import Role from '../models/role';
+import RolePermission from '../models/rolePermission';
+import { PermissionScanner } from '../services/permissionScanner';
+import logger from '../utils/logger';
+
+class PermissionController {
+    // Get all permissions
+    static async getAllPermissions(req: Request, res: Response): Promise<any> {
+        try {
+            const permissions = await Permission.findAll({
+                where: { isActive: true },
+                order: [['module', 'ASC'], ['action', 'ASC']],
+            });
+            res.json(permissions);
+        } catch (error) {
+            logger.error('Error getting permissions:', error);
+            res.status(500).json({ error: 'Internal server error' });
+        }
+    }
+
+    // Get permissions by module
+    static async getPermissionsByModule(req: Request, res: Response): Promise<any> {
+        try {
+            const { module } = req.params;
+            const permissions = await Permission.findAll({
+                where: { module, isActive: true },
+                order: [['action', 'ASC']],
+            });
+            res.json(permissions);
+        } catch (error) {
+            logger.error('Error getting permissions by module:', error);
+            res.status(500).json({ error: 'Internal server error' });
+        }
+    }
+
+    // Assign permissions to role
+    static async assignPermissionsToRole(req: Request, res: Response): Promise<any> {
+        try {
+            const { roleId } = req.params;
+            const { permissionIds } = req.body;
+
+            // Verify role exists
+            const role = await Role.findByPk(roleId);
+            if (!role) {
+                return res.status(404).json({ error: 'Role not found' });
+            }
+
+            // Remove existing permissions
+            await RolePermission.destroy({
+                where: { roleId },
+            });
+
+            // Add new permissions
+            await RolePermission.bulkCreate(
+                permissionIds.map((permissionId: string) => ({
+                    roleId,
+                    permissionId,
+                }))
+            );
+
+            res.json({ message: 'Permissions assigned successfully' });
+        } catch (error) {
+            logger.error('Error assigning permissions:', error);
+            res.status(500).json({ error: 'Internal server error' });
+        }
+    }
+
+    // Remove permissions from role
+    static async removePermissionsFromRole(req: Request, res: Response): Promise<any> {
+        try {
+            const { roleId } = req.params;
+            const { permissionIds } = req.body;
+
+            await RolePermission.destroy({
+                where: {
+                    roleId,
+                    permissionId: permissionIds,
+                },
+            });
+
+            res.json({ message: 'Permissions removed successfully' });
+        } catch (error) {
+            logger.error('Error removing permissions:', error);
+            res.status(500).json({ error: 'Internal server error' });
+        }
+    }
+
+    // Scan and sync permissions
+    static async scanAndSyncPermissions(req: Request, res: Response): Promise<any> {
+        try {
+            const scanner = new PermissionScanner();
+            await scanner.scanControllers();
+            await scanner.syncPermissions();
+            res.json({ message: 'Permissions scanned and synced successfully' });
+        } catch (error) {
+            logger.error('Error scanning and syncing permissions:', error);
+            res.status(500).json({ error: 'Internal server error' });
+        }
+    }
+}
+
+export default PermissionController; 

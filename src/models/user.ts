@@ -2,20 +2,44 @@ import {Model, DataTypes} from 'sequelize';
 import sequelize from '../config/dbConfig';
 import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
+import Role from './role';
 
 dotenv.config();
 const saltRounds = parseInt(process.env.SALT_ROUNDS || '10', 10);
 
-class User extends Model {
+interface UserAttributes {
+    id: string;
+    firstName: string;
+    lastName: string;
+    username: string;
+    password: string;
+    roleId: string;
+    email?: string;
+    isActive: boolean;
+    lastLogin?: Date;
+}
+
+interface UserCreationAttributes extends Omit<UserAttributes, 'id' | 'lastLogin' | 'isActive'> {
+    id?: string;
+    lastLogin?: Date;
+    isActive?: boolean;
+}
+
+interface UserInstance extends Model<UserAttributes, UserCreationAttributes>, UserAttributes {
+    role?: Role;
+}
+
+class User extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes {
     public id!: string;
     public firstName!: string;
     public lastName!: string;
     public username!: string;
     public password!: string;
-    public role!: 'admin' | 'user' | 'viewer' | 'developer';
+    public roleId!: string;
     public email?: string;
     public isActive!: boolean;
     public lastLogin?: Date;
+    public role?: Role;
 }
 
 User.init(
@@ -42,9 +66,13 @@ User.init(
             type: DataTypes.STRING,
             allowNull: false,
         },
-        role: {
-            type: DataTypes.ENUM('admin', 'user', 'viewer', 'developer'),
+        roleId: {
+            type: DataTypes.UUID,
             allowNull: false,
+            references: {
+                model: 'roles',
+                key: 'id'
+            }
         },
         email: {
             type: DataTypes.STRING,

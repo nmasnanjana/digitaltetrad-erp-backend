@@ -8,17 +8,36 @@ import qcCommentRoute from "./qcCommentRoute";
 import expenseRoute from "./expenseRoute";
 import expenseTypeRoute from "./expenseTypeRoute";
 import operationTypeRoute from "./operationTypeRoute";
+import roleRoute from "./roleRoute";
+import inventoryRoute from "./inventoryRoute";
+import permissionRoute from "./permissionRoutes";
+import huaweiPoRoute from "./huaweiPoRoute";
+import huaweiInvoiceRoute from "./huaweiInvoiceRoute";
+import settingsRoute from "./settingsRoute";
+import { checkPermission } from "../middleware/checkPermission";
+import { authenticate } from "../middleware/auth";
+import UserController from "../controllers/userController";
 
 const router = express.Router();
 
-router.use("/users", userRoute);
-router.use("/teams", teamRoute);
-router.use("/team-assignments", teamAssignmentRoute);
-router.use("/customers", customerRoute);
-router.use("/jobs", jobRoute);
-router.use("/qc-comments", qcCommentRoute);
-router.use("/expenses", expenseRoute);
-router.use("/expense-types", expenseTypeRoute);
-router.use("/operation-types", operationTypeRoute);
+// Auth routes
+router.post("/users/login", UserController.userLogin);
+
+// Protected routes
+router.use("/users", authenticate, userRoute);
+router.use("/teams", authenticate, teamRoute);
+router.use("/team-assignments", authenticate, teamAssignmentRoute);
+router.use("/customers", authenticate, customerRoute);
+router.use("/jobs", authenticate, jobRoute);
+router.use("/qc-comments", authenticate, qcCommentRoute);
+router.use("/expenses", authenticate, expenseRoute);
+router.use("/expense-types", authenticate, expenseTypeRoute);
+router.use("/operation-types", authenticate, operationTypeRoute);
+router.use("/roles", authenticate, roleRoute);
+router.use("/inventory", authenticate, inventoryRoute);
+router.use("/permissions", authenticate, permissionRoute);
+router.use("/huawei-pos", authenticate, huaweiPoRoute);
+router.use("/huawei-invoices", authenticate, huaweiInvoiceRoute);
+router.use("/settings", authenticate, settingsRoute);
 
 export default router;

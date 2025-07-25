@@ -1,6 +1,7 @@
 import {Request, Response} from "express";
 import Job from "../models/job";
 import logger from "../utils/logger";
+import { Op } from 'sequelize';
 
 class JobController {
     // Create a new job
@@ -45,7 +46,69 @@ class JobController {
     // Get all jobs
     static async getAllJobs(req: Request, res: Response): Promise<any> {
         try {
+            const {
+                createdStartDate,
+                createdEndDate,
+                completedStartDate,
+                completedEndDate,
+                status,
+                type,
+                customer_id
+            } = req.query;
+
+            const where: any = {};
+
+            // Filter by created date range
+            if (createdStartDate || createdEndDate) {
+                where.createdAt = {};
+                if (createdStartDate) {
+                    // Set start date to beginning of day
+                    const startDate = new Date(createdStartDate as string);
+                    startDate.setHours(0, 0, 0, 0);
+                    where.createdAt[Op.gte] = startDate;
+                }
+                if (createdEndDate) {
+                    // Set end date to end of day
+                    const endDate = new Date(createdEndDate as string);
+                    endDate.setHours(23, 59, 59, 999);
+                    where.createdAt[Op.lte] = endDate;
+                }
+            }
+
+            // Filter by completed date range
+            if (completedStartDate || completedEndDate) {
+                where.completed_at = {};
+                if (completedStartDate) {
+                    // Set start date to beginning of day
+                    const startDate = new Date(completedStartDate as string);
+                    startDate.setHours(0, 0, 0, 0);
+                    where.completed_at[Op.gte] = startDate;
+                }
+                if (completedEndDate) {
+                    // Set end date to end of day
+                    const endDate = new Date(completedEndDate as string);
+                    endDate.setHours(23, 59, 59, 999);
+                    where.completed_at[Op.lte] = endDate;
+                }
+            }
+
+            // Filter by status
+            if (status) {
+                where.status = status;
+            }
+
+            // Filter by type
+            if (type) {
+                where.type = type;
+            }
+
+            // Filter by customer
+            if (customer_id) {
+                where.customer_id = customer_id;
+            }
+
             const jobs = await Job.findAll({
+                where,
                 include: [
                     { model: Job.sequelize?.models.Team, as: 'team' },
                     { model: Job.sequelize?.models.Customer, as: 'customer' }

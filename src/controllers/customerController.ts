@@ -6,7 +6,7 @@ class CustomerController {
     // Create a new customer
     static async createCustomer(req: Request, res: Response): Promise<any> {
         try {
-            const { name } = req.body;
+            const { name, address } = req.body;
 
             // Validate required fields
             if (!name) {
@@ -16,7 +16,8 @@ class CustomerController {
             }
 
             const newCustomer = await Customer.create({
-                name
+                name,
+                address
             });
 
             const msg = `New customer created - ${newCustomer.name}`;
@@ -74,22 +75,31 @@ class CustomerController {
         }
     }
 
-    // Update customer
+    // Update customer by ID
     static async updateCustomer(req: Request, res: Response): Promise<any> {
         try {
             const { id } = req.params;
-            const { name } = req.body;
+            const { name, address } = req.body;
 
             const customer = await Customer.findByPk(id);
+
             if (!customer) {
                 return res.status(404).send({error: 'Customer not found'});
             }
 
+            // Validate required fields
+            if (!name) {
+                const msg = "Name is a required field";
+                logger.warn(msg);
+                return res.status(400).send({error: msg});
+            }
+
             await customer.update({
-                name
+                name,
+                address
             });
 
-            const msg = `Customer ${customer.name} updated successfully`;
+            const msg = `Customer updated - ${customer.name}`;
             logger.info(msg);
             return res.status(200).send({info: msg, customer});
 
@@ -98,14 +108,14 @@ class CustomerController {
                 logger.error(e.message);
                 return res.status(500).send({error: e.message});
             } else {
-                const msg = "An unknown server error occurred while updating the customer";
+                const msg = 'An unknown server error occurred while updating the customer';
                 logger.error(msg);
                 return res.status(500).send({error: msg});
             }
         }
     }
 
-    // Delete customer
+    // Delete customer by ID
     static async deleteCustomer(req: Request, res: Response): Promise<any> {
         try {
             const { id } = req.params;
@@ -116,7 +126,8 @@ class CustomerController {
             }
 
             await customer.destroy();
-            const msg = `Customer ${customer.name} deleted successfully`;
+
+            const msg = `Customer deleted - ${customer.name}`;
             logger.info(msg);
             return res.status(200).send({info: msg});
 
@@ -125,7 +136,7 @@ class CustomerController {
                 logger.error(e.message);
                 return res.status(500).send({error: e.message});
             } else {
-                const msg = "An unknown server error occurred while deleting the customer";
+                const msg = 'An unknown server error occurred while deleting the customer';
                 logger.error(msg);
                 return res.status(500).send({error: msg});
             }
