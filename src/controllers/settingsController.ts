@@ -19,6 +19,8 @@ class SettingsController {
                     email: '',
                     finance_email: '',
                     company_name: 'Company Name',
+                    company_address: '',
+                    company_logo: '',
                     bank_account: '',
                     updated_by: req.user?.id
                 });
@@ -50,6 +52,8 @@ class SettingsController {
                 email,
                 finance_email,
                 company_name,
+                company_address,
+                company_logo,
                 bank_account
             } = req.body;
 
@@ -66,6 +70,8 @@ class SettingsController {
                     email: email || '',
                     finance_email: finance_email || '',
                     company_name: company_name || 'Company Name',
+                    company_address: company_address || '',
+                    company_logo: company_logo || '',
                     bank_account: bank_account || '',
                     updated_by: req.user?.id
                 });
@@ -106,6 +112,8 @@ class SettingsController {
             if (email !== undefined) updateData.email = email;
             if (finance_email !== undefined) updateData.finance_email = finance_email;
             if (company_name !== undefined) updateData.company_name = company_name;
+            if (company_address !== undefined) updateData.company_address = company_address;
+            if (company_logo !== undefined) updateData.company_logo = company_logo;
             if (bank_account !== undefined) updateData.bank_account = bank_account;
             
             updateData.updated_by = req.user?.id;
@@ -145,6 +153,8 @@ class SettingsController {
                     email: '',
                     finance_email: '',
                     company_name: 'Company Name',
+                    company_address: '',
+                    company_logo: '',
                     bank_account: '',
                     updated_by: req.user?.id
                 });
@@ -158,6 +168,8 @@ class SettingsController {
                     email: '',
                     finance_email: '',
                     company_name: 'Company Name',
+                    company_address: '',
+                    company_logo: '',
                     bank_account: '',
                     updated_by: req.user?.id
                 });

@@ -10,10 +10,16 @@ class HuaweiInvoiceController {
     // Create invoice records
     static async createInvoice(req: Request, res: Response): Promise<any> {
         try {
-            const { invoice_no, invoice_data } = req.body;
+            const { invoice_no, invoice_data, vat_percentage } = req.body;
 
             if (!invoice_no || !invoice_data || !Array.isArray(invoice_data)) {
                 const msg = "invoice_no and invoice_data array are required";
+                logger.warn(msg);
+                return res.status(400).send({error: msg});
+            }
+
+            if (vat_percentage === undefined || vat_percentage < 0 || vat_percentage > 100) {
+                const msg = "vat_percentage is required and must be between 0 and 100";
                 logger.warn(msg);
                 return res.status(400).send({error: msg});
             }
@@ -53,11 +59,23 @@ class HuaweiInvoiceController {
                     continue;
                 }
 
-                // Create invoice record
+                // Calculate amounts
+                const unitPriceStr = huaweiPo.unit_price;
+                const unitPrice = typeof unitPriceStr === 'string' ? parseFloat(unitPriceStr) : 
+                                 typeof unitPriceStr === 'number' ? unitPriceStr : 0;
+                const subtotal_amount = unitPrice * invoiced_percentage / 100;
+                const vat_amount = subtotal_amount * vat_percentage / 100;
+                const total_amount = subtotal_amount + vat_amount;
+
+                // Create invoice record with VAT information
                 const invoice = await HuaweiInvoice.create({
                     invoice_no,
                     huawei_po_id,
-                    invoiced_percentage
+                    invoiced_percentage,
+                    vat_percentage,
+                    vat_amount,
+                    subtotal_amount,
+                    total_amount
                 });
 
                 // Update the PO's invoiced_percentage - handle decimal string conversion
@@ -67,7 +85,11 @@ class HuaweiInvoiceController {
                     new_invoice_percentage: invoiced_percentage,
                     new_total_invoiced: newTotalInvoiced,
                     po_id: huaweiPo.id,
-                    invoice_no: invoice_no
+                    invoice_no: invoice_no,
+                    vat_percentage: vat_percentage,
+                    subtotal_amount: subtotal_amount,
+                    vat_amount: vat_amount,
+                    total_amount: total_amount
                 });
                 
                 await huaweiPo.update({ invoiced_percentage: newTotalInvoiced });
@@ -89,6 +111,7 @@ class HuaweiInvoiceController {
                 data: {
                     created_invoices: createdInvoices.length,
                     invoice_no,
+                    vat_percentage,
                     errors: errors.length > 0 ? errors : undefined
                 }
             });
