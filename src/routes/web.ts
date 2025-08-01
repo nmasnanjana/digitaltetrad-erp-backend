@@ -24,6 +24,7 @@ const router = express.Router();
 router.post("/users/login", UserController.userLogin);
 
 // Protected routes
+router.get("/users/me", authenticate, UserController.getCurrentUser);
 router.use("/users", authenticate, userRoute);
 router.use("/teams", authenticate, teamRoute);
 router.use("/team-assignments", authenticate, teamAssignmentRoute);

@@ -139,7 +139,7 @@ class ExpenseController {
                 job_id: operations ? null : job_id,
                 description,
                 amount,
-                status: !operations ? 'on_progress' : null // Set status to on_progress for job-related expenses
+                status: 'on_progress' // Set status to on_progress for all expenses
             });
 
             logger.info(`New expense created with ID: ${newExpense.id}`);
@@ -167,9 +167,9 @@ class ExpenseController {
                 return res.status(404).send({ error: 'Expense not found' });
             }
 
-            // Check if expense is approved
-            if (expense.status === 'approved') {
-                return res.status(400).send({ error: 'Cannot edit an approved expense' });
+            // Check if expense is paid
+            if (expense.paid) {
+                return res.status(400).send({ error: 'Cannot edit a paid expense' });
             }
 
             // Validate required fields
@@ -187,8 +187,8 @@ class ExpenseController {
                 return res.status(400).send({ error: 'Job ID is required when operations is false' });
             }
 
-            // Reset status to on_progress if expense was denied
-            const newStatus = expense.status === 'denied' ? 'on_progress' : expense.status;
+            // Reset status to on_progress when expense is updated (for both approved and denied expenses)
+            const newStatus = 'on_progress';
 
             await expense.update({
                 expenses_type_id,
@@ -237,9 +237,9 @@ class ExpenseController {
                 return res.status(404).send({ error: 'Expense not found' });
             }
 
-            // Prevent deletion of approved expenses
-            if (expense.status === 'approved') {
-                return res.status(400).send({ error: 'Cannot delete an approved expense' });
+            // Prevent deletion of paid expenses
+            if (expense.paid) {
+                return res.status(400).send({ error: 'Cannot delete a paid expense' });
             }
 
             await expense.destroy();
@@ -299,10 +299,8 @@ class ExpenseController {
                 return res.status(404).send({ error: 'Expense not found' });
             }
 
-            // Only job-related expenses can be reviewed
-            if (expense.operations) {
-                return res.status(400).send({ error: 'Only job-related expenses can be reviewed' });
-            }
+            // Both job and operation expenses can be reviewed
+            // No restrictions on expense type for review
 
             await expense.update({
                 status,

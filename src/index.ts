@@ -9,6 +9,7 @@ import { PermissionScanner } from './services/permissionScanner';
 import Role from './models/role';
 import Permission from './models/permission';
 import RolePermission from './models/rolePermission';
+import User from './models/user';
 
 dotenv.config();
 
@@ -34,78 +35,59 @@ async function customSync() {
         const tables = await queryInterface.showAllTables();
         logger.info(`Found ${tables.length} existing tables`);
         
-        // Check if huawei_pos table exists
-        const huaweiPosExists = tables.includes('huawei_pos');
-        const huaweiInvoicesExists = tables.includes('huawei_invoices');
+        // Import all models
+        const User = require('./models/user').default;
+        const Role = require('./models/role').default;
+        const Permission = require('./models/permission').default;
+        const RolePermission = require('./models/rolePermission').default;
+        const Customer = require('./models/customer').default;
+        const Team = require('./models/team').default;
+        const TeamAssignment = require('./models/teamAssignment').default;
+        const Job = require('./models/job').default;
+        const ExpenseType = require('./models/expenseType').default;
+        const OperationType = require('./models/operationType').default;
+        const Expense = require('./models/expense').default;
+        const PurchaseOrder = require('./models/purchaseOrder').default;
+        const QCComment = require('./models/qcComment').default;
+        const Inventory = require('./models/inventory').default;
+        const HuaweiPo = require('./models/huaweiPo').default;
+        const HuaweiInvoice = require('./models/huaweiInvoice').default;
+        const Settings = require('./models/settings').default;
         
-        if (!huaweiPosExists) {
-            logger.info('Creating huawei_pos table...');
-            
-            // Import and sync HuaweiPo model specifically
-            const HuaweiPo = require('./models/huaweiPo').default;
-            await HuaweiPo.sync({ force: false });
-            logger.info('huawei_pos table created successfully');
-        } else {
-            logger.info('huawei_pos table exists, syncing to add missing columns...');
-            
-            // Import and sync HuaweiPo model to add missing columns
-            const HuaweiPo = require('./models/huaweiPo').default;
-            await HuaweiPo.sync({ alter: true });
-            logger.info('huawei_pos table synced successfully');
-        }
-
-        if (!huaweiInvoicesExists) {
-            logger.info('Creating huawei_invoices table...');
-            
-            // Import and sync HuaweiInvoice model specifically
-            const HuaweiInvoice = require('./models/huaweiInvoice').default;
-            await HuaweiInvoice.sync({ force: false });
-            logger.info('huawei_invoices table created successfully');
-        } else {
-            logger.info('huawei_invoices table exists, syncing to add missing columns...');
-            
-            // Import and sync HuaweiInvoice model to add missing columns
-            const HuaweiInvoice = require('./models/huaweiInvoice').default;
-            await HuaweiInvoice.sync({ alter: true });
-            logger.info('huawei_invoices table synced successfully');
-        }
-
-        // Check if settings table exists
-        const settingsExists = tables.includes('settings');
+        // Define table creation order (base tables first, then dependent tables)
+        const tableOrder = [
+            { name: 'roles', model: Role },
+            { name: 'users', model: User },
+            { name: 'permissions', model: Permission },
+            { name: 'role_permissions', model: RolePermission },
+            { name: 'customers', model: Customer },
+            { name: 'teams', model: Team },
+            { name: 'team_assignments', model: TeamAssignment },
+            { name: 'jobs', model: Job },
+            { name: 'expense_types', model: ExpenseType },
+            { name: 'operation_types', model: OperationType },
+            { name: 'expenses', model: Expense },
+            { name: 'purchase_orders', model: PurchaseOrder },
+            { name: 'qc_comments', model: QCComment },
+            { name: 'inventory', model: Inventory },
+            { name: 'huawei_pos', model: HuaweiPo },
+            { name: 'huawei_invoices', model: HuaweiInvoice },
+            { name: 'settings', model: Settings }
+        ];
         
-        if (!settingsExists) {
-            logger.info('Creating settings table...');
+        // Create or sync tables in order
+        for (const table of tableOrder) {
+            const tableExists = tables.includes(table.name);
             
-            // Import and sync Settings model specifically
-            const Settings = require('./models/settings').default;
-            await Settings.sync({ force: false });
-            logger.info('settings table created successfully');
-        } else {
-            logger.info('settings table exists, syncing to add missing columns...');
-            
-            // Import and sync Settings model to add missing columns
-            const Settings = require('./models/settings').default;
-            await Settings.sync({ alter: true });
-            logger.info('settings table synced successfully');
-        }
-
-        // Check if customers table exists and sync to add address column
-        const customersExists = tables.includes('customers');
-        
-        if (customersExists) {
-            logger.info('customers table exists, syncing to add address column...');
-            
-            // Import and sync Customer model to add missing columns
-            const Customer = require('./models/customer').default;
-            await Customer.sync({ alter: true });
-            logger.info('customers table synced successfully');
-        } else {
-            logger.info('Creating customers table...');
-            
-            // Import and sync Customer model specifically
-            const Customer = require('./models/customer').default;
-            await Customer.sync({ force: false });
-            logger.info('customers table created successfully');
+            if (!tableExists) {
+                logger.info(`Creating ${table.name} table...`);
+                await table.model.sync({ force: false });
+                logger.info(`${table.name} table created successfully`);
+            } else {
+                logger.info(`${table.name} table exists, syncing to add missing columns...`);
+                await table.model.sync({ alter: true });
+                logger.info(`${table.name} table synced successfully`);
+            }
         }
         
         logger.info('Custom sync completed successfully');
@@ -148,8 +130,43 @@ async function setupDeveloperRole() {
 
         await RolePermission.bulkCreate(rolePermissions);
         logger.info(`Assigned ${permissions.length} permissions to developer role`);
+        
+        return developerRole;
     } catch (error) {
         logger.error('Error setting up developer role:', error);
+        throw error;
+    }
+}
+
+// Function to create default user
+async function createDefaultUser(developerRole: any) {
+    try {
+        // Check if default user already exists
+        const existingUser = await User.findOne({ 
+            where: { username: 'admin' } 
+        });
+        
+        if (existingUser) {
+            logger.info('Default user already exists, skipping creation');
+            return;
+        }
+        
+        // Create default user
+        const defaultUser = await User.create({
+            firstName: 'System',
+            lastName: 'Administrator',
+            username: 'admin',
+            password: 'Admin@123!', // This will be hashed by the User model hooks
+            email: 'admin@erp.com',
+            roleId: developerRole.id,
+            isActive: true
+        });
+        
+        logger.info('Created default user: admin (password: Admin@123!)');
+        logger.info('⚠️  IMPORTANT: Change the default password after first login!');
+        
+    } catch (error) {
+        logger.error('Error creating default user:', error);
         throw error;
     }
 }
@@ -175,8 +192,12 @@ const startServer = async () => {
         logger.info("Permissions scanned and synced successfully.");
 
         // Setup developer role with all permissions
-        await setupDeveloperRole();
-        logger.info("Developer role setup completed.");
+        // const developerRole = await setupDeveloperRole();
+        // logger.info("Developer role setup completed.");
+
+        // Create default user
+        // await createDefaultUser(developerRole);
+        // logger.info("Default user setup completed.");
 
         app.listen(PORT, () => {
             logger.info(`Server running at http://localhost:${PORT}`);

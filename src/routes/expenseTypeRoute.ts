@@ -1,13 +1,14 @@
 import express from "express";
 import ExpenseTypeController from "../controllers/expenseTypeController";
+import { checkPermission } from "../middleware/checkPermission";
 
 const router = express.Router();
 
 // Expense type routes
-router.post("/", ExpenseTypeController.createExpenseType); // Create a new expense type
-router.get("/", ExpenseTypeController.getAllExpenseTypes); // Get all expense types
-router.get("/:id", ExpenseTypeController.getExpenseTypeById); // Get expense type by ID
-router.put("/:id", ExpenseTypeController.updateExpenseType); // Update expense type
-router.delete("/:id", ExpenseTypeController.deleteExpenseType); // Delete expense type
+router.post("/", checkPermission('expensetype', 'create'), ExpenseTypeController.createExpenseType); // Create a new expense type
+router.get("/", checkPermission('expensetype', 'read'), ExpenseTypeController.getAllExpenseTypes); // Get all expense types
+router.get("/:id", checkPermission('expensetype', 'read'), ExpenseTypeController.getExpenseTypeById); // Get expense type by ID
+router.put("/:id", checkPermission('expensetype', 'update'), ExpenseTypeController.updateExpenseType); // Update expense type
+router.delete("/:id", checkPermission('expensetype', 'delete'), ExpenseTypeController.deleteExpenseType); // Delete expense type
 
 export default router; 
