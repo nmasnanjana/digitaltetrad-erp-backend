@@ -192,12 +192,12 @@ const startServer = async () => {
         logger.info("Permissions scanned and synced successfully.");
 
         // Setup developer role with all permissions
-        // const developerRole = await setupDeveloperRole();
-        // logger.info("Developer role setup completed.");
+        const developerRole = await setupDeveloperRole();
+        logger.info("Developer role setup completed.");
 
         // Create default user
-        // await createDefaultUser(developerRole);
-        // logger.info("Default user setup completed.");
+        await createDefaultUser(developerRole);
+        logger.info("Default user setup completed.");
 
         app.listen(PORT, () => {
             logger.info(`Server running at http://localhost:${PORT}`);
