@@ -280,8 +280,28 @@ class HuaweiInvoiceController {
     static async getInvoicesByInvoiceNo(req: Request, res: Response): Promise<any> {
         try {
             const { invoice_no } = req.params;
+            logger.info(`Fetching invoices for invoice_no: ${invoice_no}`);
+            
+            // First, let's check if the HuaweiPo records exist
+            const huaweiPoIds = await HuaweiInvoice.findAll({
+                where: { invoice_no },
+                attributes: ['huawei_po_id']
+            });
+            
+            logger.info(`Found ${huaweiPoIds.length} invoice records with huawei_po_ids:`, huaweiPoIds.map(inv => inv.huawei_po_id));
+            
+            // Check if these HuaweiPo records exist
+            for (const invoice of huaweiPoIds) {
+                const huaweiPo = await HuaweiPo.findByPk(invoice.huawei_po_id);
+                logger.info(`HuaweiPo ID ${invoice.huawei_po_id}: ${huaweiPo ? 'exists' : 'NOT FOUND'}`);
+                if (huaweiPo) {
+                    logger.info(`  HuaweiPo details: id=${huaweiPo.id}, po_no=${huaweiPo.po_no}, line_no=${huaweiPo.line_no}`);
+                }
+            }
+            
             const invoices = await HuaweiInvoice.findAll({
                 where: { invoice_no },
+                attributes: ['id', 'invoice_no', 'huawei_po_id', 'invoiced_percentage', 'vat_percentage', 'vat_amount', 'subtotal_amount', 'total_amount', 'createdAt', 'updatedAt'],
                 include: [
                     {
                         model: HuaweiPo,
@@ -298,6 +318,20 @@ class HuaweiInvoiceController {
                 ],
                 order: [['createdAt', 'ASC']]
             });
+
+            logger.info(`Found ${invoices.length} invoices`);
+            
+            // Check if huaweiPo relationships are working
+            for (let i = 0; i < invoices.length; i++) {
+                const invoice = invoices[i] as any;
+                logger.info(`Invoice ${i + 1}: huawei_po_id = ${invoice.huawei_po_id}, huaweiPo = ${invoice.huaweiPo ? 'exists' : 'null'}`);
+                
+                if (invoice.huaweiPo) {
+                    logger.info(`  HuaweiPo details: id=${invoice.huaweiPo.id}, po_no=${invoice.huaweiPo.po_no}, line_no=${invoice.huaweiPo.line_no}`);
+                }
+            }
+            
+            logger.info('First invoice structure:', JSON.stringify(invoices[0], null, 2));
 
             if (invoices.length === 0) {
                 return res.status(404).send({error: 'No invoices found with this invoice number'});

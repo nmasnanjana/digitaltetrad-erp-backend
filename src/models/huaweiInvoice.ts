@@ -1,6 +1,5 @@
 import {Model, DataTypes} from 'sequelize';
 import sequelize from '../config/dbConfig';
-import HuaweiPo from './huaweiPo';
 
 interface HuaweiInvoiceAttributes {
     id: number;
@@ -43,7 +42,7 @@ HuaweiInvoice.init(
             type: DataTypes.INTEGER,
             allowNull: false,
             references: {
-                model: HuaweiPo,
+                model: 'huawei_pos',
                 key: 'id',
             },
             onDelete: 'CASCADE',
