@@ -3,10 +3,19 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
-    "dev": "nodemon",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "dev": "nodemon src/index.ts",
+    "build:prod": "npm run build && npm run test",
+    "start:prod": "NODE_ENV=production node dist/index.js",
+    "deploy": "npm run build:prod && npm run start:prod",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "db:migrate": "npx sequelize-cli db:migrate",
+    "db:seed": "npx sequelize-cli db:seed:all",
+    "db:reset": "npx sequelize-cli db:drop && npx sequelize-cli db:create && npx sequelize-cli db:migrate && npx sequelize-cli db:seed:all"
   },
   "author": "Anjana Narasinghe",
   "license": "ISC",

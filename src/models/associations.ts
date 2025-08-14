@@ -72,6 +72,10 @@ HuaweiInvoice.belongsTo(HuaweiPo, { foreignKey: 'huawei_po_id', as: 'huaweiPo' }
 HuaweiPo.hasOne(HuaweiInvoice, { foreignKey: 'huawei_po_id', as: 'huaweiInvoice' });
 
 // Export setup in case needed
-export const setupAssociations = () => {};
+export const setupAssociations = () => {
+    // This function is called to ensure all associations are properly set up
+    // The associations are already defined above, this is just a placeholder
+    // to ensure the file is imported and associations are loaded
+};
 
 export { User, Role, Inventory, Permission, RolePermission };

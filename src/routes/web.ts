@@ -14,6 +14,7 @@ import permissionRoute from "./permissionRoutes";
 import huaweiPoRoute from "./huaweiPoRoute";
 import huaweiInvoiceRoute from "./huaweiInvoiceRoute";
 import settingsRoute from "./settingsRoute";
+import cacheRoute from "./cacheRoute";
 import { checkPermission } from "../middleware/checkPermission";
 import { authenticate } from "../middleware/auth";
 import UserController from "../controllers/userController";
@@ -24,6 +25,7 @@ const router = express.Router();
 router.post("/users/login", UserController.userLogin);
 
 // Protected routes
+router.get("/users/me", authenticate, UserController.getCurrentUser);
 router.use("/users", authenticate, userRoute);
 router.use("/teams", authenticate, teamRoute);
 router.use("/team-assignments", authenticate, teamAssignmentRoute);
@@ -39,5 +41,6 @@ router.use("/permissions", authenticate, permissionRoute);
 router.use("/huawei-pos", authenticate, huaweiPoRoute);
 router.use("/huawei-invoices", authenticate, huaweiInvoiceRoute);
 router.use("/settings", authenticate, settingsRoute);
+router.use("/cache", authenticate, cacheRoute);
 
 export default router;

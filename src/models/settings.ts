@@ -11,6 +11,8 @@ interface SettingsAttributes {
     email: string;
     finance_email: string;
     company_name: string;
+    company_address: string;
+    company_logo: string;
     bank_account: string;
     updated_by?: string;
 }
@@ -27,6 +29,8 @@ class Settings extends Model<SettingsAttributes, SettingsCreationAttributes> imp
     public email!: string;
     public finance_email!: string;
     public company_name!: string;
+    public company_address!: string;
+    public company_logo!: string;
     public bank_account!: string;
     public updated_by?: string;
 }
@@ -96,6 +100,16 @@ Settings.init(
             type: DataTypes.STRING,
             allowNull: false,
             defaultValue: 'Company Name'
+        },
+        company_address: {
+            type: DataTypes.TEXT,
+            allowNull: true,
+            comment: 'Multi-line company address'
+        },
+        company_logo: {
+            type: DataTypes.TEXT,
+            allowNull: true,
+            comment: 'Base64 encoded company logo'
         },
         bank_account: {
             type: DataTypes.TEXT,
