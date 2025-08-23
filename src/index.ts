@@ -52,6 +52,7 @@ async function customSync() {
         const Inventory = require('./models/inventory').default;
         const HuaweiPo = require('./models/huaweiPo').default;
         const HuaweiInvoice = require('./models/huaweiInvoice').default;
+        const EricssonRateCard = require('./models/ericssonRateCard').default;
         const Settings = require('./models/settings').default;
         
         // Define table creation order (base tables first, then dependent tables)
@@ -72,6 +73,7 @@ async function customSync() {
             { name: 'inventory', model: Inventory },
             { name: 'huawei_pos', model: HuaweiPo },
             { name: 'huawei_invoices', model: HuaweiInvoice },
+            { name: 'ericsson_rate_cards', model: EricssonRateCard },
             { name: 'settings', model: Settings }
         ];
         

@@ -14,6 +14,7 @@ import Permission from "./permission";
 import RolePermission from "./rolePermission";
 import HuaweiPo from "./huaweiPo";
 import HuaweiInvoice from "./huaweiInvoice";
+import EricssonRateCard from "./ericssonRateCard";
 
 // Role-User relationship
 User.belongsTo(Role, { foreignKey: 'roleId', as: 'role' });
@@ -70,6 +71,10 @@ User.hasMany(HuaweiPo, { foreignKey: 'uploaded_by', as: 'uploadedHuaweiPos' });
 // Huawei Invoice relationships
 HuaweiInvoice.belongsTo(HuaweiPo, { foreignKey: 'huawei_po_id', as: 'huaweiPo' });
 HuaweiPo.hasOne(HuaweiInvoice, { foreignKey: 'huawei_po_id', as: 'huaweiInvoice' });
+
+// Ericsson Rate Card relationships
+EricssonRateCard.belongsTo(User, { foreignKey: 'uploaded_by', as: 'uploader' });
+User.hasMany(EricssonRateCard, { foreignKey: 'uploaded_by', as: 'uploadedEricssonRateCards' });
 
 // Export setup in case needed
 export const setupAssociations = () => {

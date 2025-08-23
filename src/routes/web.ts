@@ -13,6 +13,7 @@ import inventoryRoute from "./inventoryRoute";
 import permissionRoute from "./permissionRoutes";
 import huaweiPoRoute from "./huaweiPoRoute";
 import huaweiInvoiceRoute from "./huaweiInvoiceRoute";
+import ericssonRateCardRoute from "./ericssonRateCardRoute";
 import settingsRoute from "./settingsRoute";
 import cacheRoute from "./cacheRoute";
 import { checkPermission } from "../middleware/checkPermission";
@@ -23,6 +24,9 @@ const router = express.Router();
 
 // Auth routes
 router.post("/users/login", UserController.userLogin);
+
+// Public routes (no auth required)
+router.use("/public/settings", settingsRoute);
 
 // Protected routes
 router.get("/users/me", authenticate, UserController.getCurrentUser);
@@ -40,6 +44,7 @@ router.use("/inventory", authenticate, inventoryRoute);
 router.use("/permissions", authenticate, permissionRoute);
 router.use("/huawei-pos", authenticate, huaweiPoRoute);
 router.use("/huawei-invoices", authenticate, huaweiInvoiceRoute);
+router.use("/ericsson-rate-cards", authenticate, ericssonRateCardRoute);
 router.use("/settings", authenticate, settingsRoute);
 router.use("/cache", authenticate, cacheRoute);
 
