@@ -14,6 +14,7 @@ import permissionRoute from "./permissionRoutes";
 import huaweiPoRoute from "./huaweiPoRoute";
 import huaweiInvoiceRoute from "./huaweiInvoiceRoute";
 import ericssonRateCardRoute from "./ericssonRateCardRoute";
+import ericssonBoqRoute from "./ericssonBoqRoute";
 import settingsRoute from "./settingsRoute";
 import cacheRoute from "./cacheRoute";
 import { checkPermission } from "../middleware/checkPermission";
@@ -45,6 +46,7 @@ router.use("/permissions", authenticate, permissionRoute);
 router.use("/huawei-pos", authenticate, huaweiPoRoute);
 router.use("/huawei-invoices", authenticate, huaweiInvoiceRoute);
 router.use("/ericsson-rate-cards", authenticate, ericssonRateCardRoute);
+router.use("/ericsson-boqs", authenticate, ericssonBoqRoute);
 router.use("/settings", authenticate, settingsRoute);
 router.use("/cache", authenticate, cacheRoute);
 

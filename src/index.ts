@@ -53,6 +53,10 @@ async function customSync() {
         const HuaweiPo = require('./models/huaweiPo').default;
         const HuaweiInvoice = require('./models/huaweiInvoice').default;
         const EricssonRateCard = require('./models/ericssonRateCard').default;
+        const EricssonBoq = require('./models/ericssonBoq').default;
+        const EricssonBoqItem = require('./models/ericssonBoqItem').default;
+        const EricssonBoqRemoveMaterial = require('./models/ericssonBoqRemoveMaterial').default;
+        const EricssonBoqSurplusMaterial = require('./models/ericssonBoqSurplusMaterial').default;
         const Settings = require('./models/settings').default;
         
         // Define table creation order (base tables first, then dependent tables)
@@ -74,6 +78,10 @@ async function customSync() {
             { name: 'huawei_pos', model: HuaweiPo },
             { name: 'huawei_invoices', model: HuaweiInvoice },
             { name: 'ericsson_rate_cards', model: EricssonRateCard },
+            { name: 'ericsson_boqs', model: EricssonBoq },
+            { name: 'ericsson_boq_items', model: EricssonBoqItem },
+            { name: 'ericsson_boq_remove_materials', model: EricssonBoqRemoveMaterial },
+            { name: 'ericsson_boq_surplus_materials', model: EricssonBoqSurplusMaterial },
             { name: 'settings', model: Settings }
         ];
         
