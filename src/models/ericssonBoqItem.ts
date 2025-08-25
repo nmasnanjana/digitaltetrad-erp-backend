@@ -12,6 +12,7 @@ interface EricssonBoqItemAttributes {
     total_amount: number;
     is_additional_work: boolean;
     rate_card_id?: number | null;
+    invoiced_percentage: number;
     uploaded_at?: Date;
     uploaded_by?: string | null;
 }
@@ -31,6 +32,7 @@ class EricssonBoqItem extends Model<EricssonBoqItemAttributes, EricssonBoqItemCr
     public total_amount!: number;
     public is_additional_work!: boolean;
     public rate_card_id?: number | null;
+    public invoiced_percentage!: number;
     public uploaded_at?: Date;
     public uploaded_by?: string | null;
 }
@@ -96,6 +98,15 @@ EricssonBoqItem.init(
             references: {
                 model: 'ericsson_rate_cards',
                 key: 'id'
+            }
+        },
+        invoiced_percentage: {
+            type: DataTypes.DECIMAL(5, 2),
+            allowNull: false,
+            defaultValue: 0,
+            validate: {
+                min: 0,
+                max: 100
             }
         },
         uploaded_at: {

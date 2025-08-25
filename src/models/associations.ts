@@ -15,6 +15,7 @@ import RolePermission from "./rolePermission";
 import HuaweiPo from "./huaweiPo";
 import HuaweiInvoice from "./huaweiInvoice";
 import EricssonRateCard from "./ericssonRateCard";
+import EricssonInvoice from "./ericssonInvoice";
 
 // Role-User relationship
 User.belongsTo(Role, { foreignKey: 'roleId', as: 'role' });
@@ -81,6 +82,13 @@ import EricssonBoq from "./ericssonBoq";
 import EricssonBoqItem from "./ericssonBoqItem";
 import EricssonBoqRemoveMaterial from "./ericssonBoqRemoveMaterial";
 import EricssonBoqSurplusMaterial from "./ericssonBoqSurplusMaterial";
+
+// Ericsson Invoice relationships
+EricssonInvoice.belongsTo(User, { foreignKey: 'created_by', as: 'creator' });
+User.hasMany(EricssonInvoice, { foreignKey: 'created_by', as: 'createdEricssonInvoices' });
+
+EricssonInvoice.belongsTo(Job, { foreignKey: 'job_id', as: 'job' });
+Job.hasMany(EricssonInvoice, { foreignKey: 'job_id', as: 'ericssonInvoices' });
 
 EricssonBoq.belongsTo(User, { foreignKey: 'uploaded_by', as: 'uploader' });
 User.hasMany(EricssonBoq, { foreignKey: 'uploaded_by', as: 'uploadedEricssonBoqs' });

@@ -142,8 +142,36 @@ class EricssonBoqController {
             }
 
             // Check if BOQ already exists for this job
-            const existingBoq = await EricssonBoq.findOne({ where: { job_id } });
+            const existingBoq = await EricssonBoq.findOne({ 
+                where: { job_id },
+                include: [
+                    {
+                        model: EricssonBoqItem,
+                        as: 'items'
+                    }
+                ]
+            });
+            
             if (existingBoq) {
+                // Check if any items have been invoiced
+                const boqItems = (existingBoq as any).items || [];
+                const invoicedItems = boqItems.filter((item: any) => 
+                    parseFloat(item.invoiced_percentage) > 0
+                );
+
+                if (invoicedItems.length > 0) {
+                    const msg = `Cannot upload new BOQ for job ${job_id}. ${invoicedItems.length} items have been invoiced. BOQ is frozen.`;
+                    logger.warn(msg);
+                    return res.status(400).send({ 
+                        error: msg,
+                        invoicedItems: invoicedItems.map((item: any) => ({
+                            service_number: item.service_number,
+                            item_description: item.item_description,
+                            invoiced_percentage: item.invoiced_percentage
+                        }))
+                    });
+                }
+
                 const msg = `BOQ already exists for job ${job_id}. Please delete existing BOQ first.`;
                 logger.warn(msg);
                 return res.status(400).send({ error: msg });
@@ -477,9 +505,37 @@ class EricssonBoqController {
         try {
             const { jobId } = req.params;
             
-            const boq = await EricssonBoq.findOne({ where: { job_id: jobId } });
+            const boq = await EricssonBoq.findOne({ 
+                where: { job_id: jobId },
+                include: [
+                    {
+                        model: EricssonBoqItem,
+                        as: 'items'
+                    }
+                ]
+            });
+            
             if (!boq) {
                 return res.status(404).send({ error: 'BOQ not found for this job' });
+            }
+
+            // Check if any items have been invoiced
+            const boqItems = (boq as any).items || [];
+            const invoicedItems = boqItems.filter((item: any) => 
+                parseFloat(item.invoiced_percentage) > 0
+            );
+
+            if (invoicedItems.length > 0) {
+                const msg = `Cannot delete BOQ for job ${jobId}. ${invoicedItems.length} items have been invoiced. BOQ is frozen.`;
+                logger.warn(msg);
+                return res.status(400).send({ 
+                    error: msg,
+                    invoicedItems: invoicedItems.map((item: any) => ({
+                        service_number: item.service_number,
+                        item_description: item.item_description,
+                        invoiced_percentage: item.invoiced_percentage
+                    }))
+                });
             }
 
             // Delete related items and materials first
