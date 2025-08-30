@@ -71,7 +71,7 @@ User.hasMany(HuaweiPo, { foreignKey: 'uploaded_by', as: 'uploadedHuaweiPos' });
 
 // Huawei Invoice relationships
 HuaweiInvoice.belongsTo(HuaweiPo, { foreignKey: 'huawei_po_id', as: 'huaweiPo' });
-HuaweiPo.hasOne(HuaweiInvoice, { foreignKey: 'huawei_po_id', as: 'huaweiInvoice' });
+HuaweiPo.hasMany(HuaweiInvoice, { foreignKey: 'huawei_po_id', as: 'huaweiInvoices' });
 
 // Ericsson Rate Card relationships
 EricssonRateCard.belongsTo(User, { foreignKey: 'uploaded_by', as: 'uploader' });

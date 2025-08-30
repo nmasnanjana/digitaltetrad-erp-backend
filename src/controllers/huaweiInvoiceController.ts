@@ -3,7 +3,8 @@ import HuaweiInvoice from "../models/huaweiInvoice";
 import HuaweiPo from "../models/huaweiPo";
 import Job from "../models/job";
 import Customer from "../models/customer";
-import { Op } from "sequelize";
+import { Op, QueryTypes } from "sequelize";
+import sequelize from "../config/dbConfig";
 import logger from "../utils/logger";
 
 class HuaweiInvoiceController {
@@ -131,24 +132,29 @@ class HuaweiInvoiceController {
     // Get all invoices
     static async getAllInvoices(req: Request, res: Response): Promise<any> {
         try {
+
+            
+
+            
+
+            
+            // Get invoices with includes
             const invoices = await HuaweiInvoice.findAll({
                 include: [
                     {
                         model: HuaweiPo,
                         as: 'huaweiPo',
-                        attributes: ['id', 'po_no', 'line_no', 'item_code', 'item_description', 'unit_price', 'requested_quantity', 'invoiced_percentage'],
+                        attributes: ['id', 'po_no', 'line_no', 'item_code', 'item_description', 'unit_price', 'requested_quantity', 'invoiced_percentage', 'job_id', 'customer_id'],
                         include: [
                             {
                                 model: Job,
                                 as: 'job',
-                                attributes: ['id', 'name'],
-                                include: [
-                                    {
-                                        model: Customer,
-                                        as: 'customer',
-                                        attributes: ['id', 'name']
-                                    }
-                                ]
+                                attributes: ['id', 'name']
+                            },
+                            {
+                                model: Customer,
+                                as: 'customer',
+                                attributes: ['id', 'name']
                             }
                         ]
                     }
@@ -156,28 +162,9 @@ class HuaweiInvoiceController {
                 order: [['createdAt', 'DESC']]
             });
 
-            // Debug logging
-            if (invoices.length > 0) {
-                const firstInvoice = invoices[0] as any;
-                logger.info('First invoice structure:', {
-                    invoice_id: firstInvoice.id,
-                    huawei_po: firstInvoice.huaweiPo ? {
-                        id: firstInvoice.huaweiPo.id,
-                        job_id: firstInvoice.huaweiPo.job_id
-                    } : null,
-                    job: firstInvoice.huaweiPo?.job ? {
-                        id: firstInvoice.huaweiPo.job.id,
-                        name: firstInvoice.huaweiPo.job.name,
-                        customer_id: firstInvoice.huaweiPo.job.customer_id
-                    } : null,
-                    customer: firstInvoice.huaweiPo?.job?.customer ? {
-                        id: firstInvoice.huaweiPo.job.customer.id,
-                        name: firstInvoice.huaweiPo.job.customer.name
-                    } : null
-                });
-            }
+            const invoicesWithData = invoices;
 
-            return res.status(200).json(invoices);
+            return res.status(200).json(invoicesWithData);
         } catch (e: unknown) {
             if (e instanceof Error) {
                 logger.error(e.message);
@@ -249,11 +236,16 @@ class HuaweiInvoiceController {
                     {
                         model: HuaweiPo,
                         as: 'huaweiPo',
-                        attributes: ['id', 'po_no', 'line_no', 'item_code', 'item_description', 'unit_price', 'requested_quantity', 'invoiced_percentage'],
+                        attributes: ['id', 'po_no', 'line_no', 'item_code', 'item_description', 'unit_price', 'requested_quantity', 'invoiced_percentage', 'job_id', 'customer_id'],
                         include: [
                             {
                                 model: Job,
                                 as: 'job',
+                                attributes: ['id', 'name']
+                            },
+                            {
+                                model: Customer,
+                                as: 'customer',
                                 attributes: ['id', 'name']
                             }
                         ]
@@ -306,11 +298,16 @@ class HuaweiInvoiceController {
                     {
                         model: HuaweiPo,
                         as: 'huaweiPo',
-                        attributes: ['id', 'po_no', 'line_no', 'item_code', 'item_description', 'unit_price', 'requested_quantity', 'invoiced_percentage'],
+                        attributes: ['id', 'po_no', 'line_no', 'item_code', 'item_description', 'unit_price', 'requested_quantity', 'invoiced_percentage', 'job_id', 'customer_id'],
                         include: [
                             {
                                 model: Job,
                                 as: 'job',
+                                attributes: ['id', 'name']
+                            },
+                            {
+                                model: Customer,
+                                as: 'customer',
                                 attributes: ['id', 'name']
                             }
                         ]

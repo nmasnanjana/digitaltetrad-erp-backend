@@ -10,6 +10,10 @@ import Role from './models/role';
 import Permission from './models/permission';
 import RolePermission from './models/rolePermission';
 import User from './models/user';
+import HuaweiPo from './models/huaweiPo';
+import HuaweiInvoice from './models/huaweiInvoice';
+import Job from './models/job';
+import Customer from './models/customer';
 
 dotenv.config();
 
