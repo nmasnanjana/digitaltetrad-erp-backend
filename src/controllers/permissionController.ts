@@ -4,16 +4,54 @@ import Role from '../models/role';
 import RolePermission from '../models/rolePermission';
 import { PermissionScanner } from '../services/permissionScanner';
 import logger from '../utils/logger';
+import { Op } from 'sequelize';
 
 class PermissionController {
-    // Get all permissions
+    // Get all permissions with pagination and search
     static async getAllPermissions(req: Request, res: Response): Promise<any> {
         try {
+            const page = parseInt(req.query.page as string) || 1;
+            const limit = parseInt(req.query.limit as string) || 10;
+            const search = req.query.search as string || '';
+            
+            const offset = (page - 1) * limit;
+            
+            // Build where clause for search
+            const whereClause: any = { isActive: true };
+            if (search) {
+                whereClause[Op.or] = [
+                    { module: { [Op.like]: `%${search}%` } },
+                    { action: { [Op.like]: `%${search}%` } },
+                    { description: { [Op.like]: `%${search}%` } }
+                ];
+            }
+            
+            // Get total count for pagination
+            const totalCount = await Permission.count({ where: whereClause });
+            
+            // Get permissions with pagination
             const permissions = await Permission.findAll({
-                where: { isActive: true },
+                where: whereClause,
                 order: [['module', 'ASC'], ['action', 'ASC']],
+                limit,
+                offset
             });
-            res.json(permissions);
+            
+            const totalPages = Math.ceil(totalCount / limit);
+            const hasNextPage = page < totalPages;
+            const hasPrevPage = page > 1;
+            
+            res.json({
+                permissions,
+                pagination: {
+                    currentPage: page,
+                    totalPages,
+                    totalCount,
+                    limit,
+                    hasNextPage,
+                    hasPrevPage
+                }
+            });
         } catch (error) {
             logger.error('Error getting permissions:', error);
             res.status(500).json({ error: 'Internal server error' });
