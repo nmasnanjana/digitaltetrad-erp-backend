@@ -5,48 +5,40 @@ module.exports = {
   async up (queryInterface, Sequelize) {
     await queryInterface.createTable('ericsson_boqs', {
       id: {
-        type: Sequelize.UUID,
+        type: Sequelize.INTEGER,
         primaryKey: true,
-        defaultValue: Sequelize.UUIDV4
+        autoIncrement: true
       },
-      boqNumber: {
+      job_id: {
         type: Sequelize.STRING,
         allowNull: false,
         unique: true
       },
-      projectName: {
+      project: {
         type: Sequelize.STRING,
         allowNull: false
       },
-      customerName: {
+      site_id: {
         type: Sequelize.STRING,
         allowNull: false
       },
-      totalAmount: {
-        type: Sequelize.DECIMAL(10, 2),
+      site_name: {
+        type: Sequelize.STRING,
         allowNull: false
       },
-      boqDate: {
+      purchase_order_number: {
+        type: Sequelize.STRING,
+        allowNull: false
+      },
+      uploaded_at: {
         type: Sequelize.DATE,
-        allowNull: false
+        allowNull: true,
+        defaultValue: Sequelize.NOW
       },
-      status: {
-        type: Sequelize.ENUM('draft', 'approved', 'in_progress', 'completed', 'cancelled'),
-        defaultValue: 'draft'
-      },
-      filePath: {
-        type: Sequelize.STRING,
-        allowNull: true
-      },
-      createdBy: {
+      uploaded_by: {
         type: Sequelize.UUID,
-        allowNull: false,
-        references: {
-          model: 'users',
-          key: 'id'
-        },
-        onUpdate: 'CASCADE',
-        onDelete: 'RESTRICT'
+        allowNull: true,
+        defaultValue: null
       },
       createdAt: {
         type: Sequelize.DATE,
