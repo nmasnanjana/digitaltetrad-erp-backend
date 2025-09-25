@@ -5,12 +5,12 @@ module.exports = {
   async up (queryInterface, Sequelize) {
     await queryInterface.createTable('qc_comments', {
       id: {
-        type: Sequelize.UUID,
+        type: Sequelize.INTEGER,
         primaryKey: true,
-        defaultValue: Sequelize.UUIDV4
+        autoIncrement: true
       },
-      jobId: {
-        type: Sequelize.UUID,
+      job_id: {
+        type: Sequelize.STRING,
         allowNull: false,
         references: {
           model: 'jobs',
@@ -19,15 +19,7 @@ module.exports = {
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE'
       },
-      comment: {
-        type: Sequelize.TEXT,
-        allowNull: false
-      },
-      commentType: {
-        type: Sequelize.ENUM('quality', 'safety', 'progress', 'other'),
-        defaultValue: 'other'
-      },
-      createdBy: {
+      user_id: {
         type: Sequelize.UUID,
         allowNull: false,
         references: {
@@ -36,6 +28,10 @@ module.exports = {
         },
         onUpdate: 'CASCADE',
         onDelete: 'RESTRICT'
+      },
+      description: {
+        type: Sequelize.TEXT,
+        allowNull: false
       },
       createdAt: {
         type: Sequelize.DATE,

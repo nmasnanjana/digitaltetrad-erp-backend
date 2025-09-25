@@ -9,6 +9,11 @@ module.exports = {
         primaryKey: true,
         defaultValue: Sequelize.UUIDV4
       },
+      name: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        unique: true
+      },
       module: {
         type: Sequelize.STRING,
         allowNull: false
@@ -18,7 +23,7 @@ module.exports = {
         allowNull: false
       },
       description: {
-        type: Sequelize.TEXT,
+        type: Sequelize.STRING,
         allowNull: true
       },
       isActive: {

@@ -5,110 +5,69 @@ module.exports = {
   async up (queryInterface, Sequelize) {
     await queryInterface.createTable('settings', {
       id: {
-        type: Sequelize.UUID,
+        type: Sequelize.INTEGER,
         primaryKey: true,
-        defaultValue: Sequelize.UUIDV4
+        autoIncrement: true
+      },
+      currency: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        defaultValue: 'USD'
+      },
+      vat_percentage: {
+        type: Sequelize.DECIMAL(5, 2),
+        allowNull: false,
+        defaultValue: 0.00
+      },
+      ssl_percentage: {
+        type: Sequelize.DECIMAL(5, 2),
+        allowNull: false,
+        defaultValue: 0.00
+      },
+      vat_number: {
+        type: Sequelize.STRING,
+        allowNull: true
+      },
+      business_registration_number: {
+        type: Sequelize.STRING,
+        allowNull: true
+      },
+      contact_number: {
+        type: Sequelize.STRING,
+        allowNull: true
+      },
+      email: {
+        type: Sequelize.STRING,
+        allowNull: true
+      },
+      finance_email: {
+        type: Sequelize.STRING,
+        allowNull: true
       },
       company_name: {
         type: Sequelize.STRING,
         allowNull: false,
         defaultValue: 'Company Name'
       },
+      company_address: {
+        type: Sequelize.TEXT,
+        allowNull: true,
+        comment: 'Multi-line company address'
+      },
       company_logo: {
         type: Sequelize.TEXT('long'),
         allowNull: true,
         comment: 'Base64 encoded company logo'
       },
-      company_address: {
+      bank_account: {
         type: Sequelize.TEXT,
-        allowNull: true
-      },
-      company_phone: {
-        type: Sequelize.STRING,
-        allowNull: true
-      },
-      company_email: {
-        type: Sequelize.STRING,
-        allowNull: true
-      },
-      currency: {
-        type: Sequelize.STRING,
-        allowNull: false,
-        defaultValue: 'LKR'
-      },
-      timezone: {
-        type: Sequelize.STRING,
-        allowNull: false,
-        defaultValue: 'Asia/Colombo'
-      },
-      date_format: {
-        type: Sequelize.STRING,
-        allowNull: false,
-        defaultValue: 'DD/MM/YYYY'
-      },
-      time_format: {
-        type: Sequelize.STRING,
-        allowNull: false,
-        defaultValue: '24'
-      },
-      language: {
-        type: Sequelize.STRING,
-        allowNull: false,
-        defaultValue: 'en'
-      },
-      theme: {
-        type: Sequelize.STRING,
-        allowNull: false,
-        defaultValue: 'light'
-      },
-      email_notifications: {
-        type: Sequelize.BOOLEAN,
-        allowNull: false,
-        defaultValue: true
-      },
-      sms_notifications: {
-        type: Sequelize.BOOLEAN,
-        allowNull: false,
-        defaultValue: false
-      },
-      auto_backup: {
-        type: Sequelize.BOOLEAN,
-        allowNull: false,
-        defaultValue: true
-      },
-      backup_frequency: {
-        type: Sequelize.ENUM('daily', 'weekly', 'monthly'),
-        allowNull: false,
-        defaultValue: 'daily'
-      },
-      maintenance_mode: {
-        type: Sequelize.BOOLEAN,
-        allowNull: false,
-        defaultValue: false
-      },
-      maintenance_message: {
-        type: Sequelize.TEXT,
-        allowNull: true
-      },
-      createdBy: {
-        type: Sequelize.UUID,
         allowNull: true,
-        references: {
-          model: 'users',
-          key: 'id'
-        },
-        onUpdate: 'CASCADE',
-        onDelete: 'SET NULL'
+        comment: 'Multi-line bank account details'
       },
-      updatedBy: {
-        type: Sequelize.UUID,
+      updated_by: {
+        type: Sequelize.STRING,
         allowNull: true,
-        references: {
-          model: 'users',
-          key: 'id'
-        },
-        onUpdate: 'CASCADE',
-        onDelete: 'SET NULL'
+        defaultValue: null
       },
       createdAt: {
         type: Sequelize.DATE,

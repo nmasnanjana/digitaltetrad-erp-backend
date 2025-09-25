@@ -5,29 +5,18 @@ module.exports = {
   async up (queryInterface, Sequelize) {
     await queryInterface.createTable('customers', {
       id: {
-        type: Sequelize.UUID,
+        type: Sequelize.INTEGER,
         primaryKey: true,
-        defaultValue: Sequelize.UUIDV4
+        autoIncrement: true
       },
       name: {
         type: Sequelize.STRING,
         allowNull: false
       },
-      email: {
-        type: Sequelize.STRING,
-        allowNull: true
-      },
-      phone: {
-        type: Sequelize.STRING,
-        allowNull: true
-      },
       address: {
         type: Sequelize.TEXT,
-        allowNull: true
-      },
-      isActive: {
-        type: Sequelize.BOOLEAN,
-        defaultValue: true
+        allowNull: true,
+        comment: 'Multi-line address for the customer'
       },
       createdAt: {
         type: Sequelize.DATE,

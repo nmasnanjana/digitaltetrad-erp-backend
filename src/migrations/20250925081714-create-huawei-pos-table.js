@@ -3,34 +3,29 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up (queryInterface, Sequelize) {
-    await queryInterface.createTable('ericsson_invoices', {
+    await queryInterface.createTable('huawei_pos', {
       id: {
         type: Sequelize.INTEGER,
         primaryKey: true,
         autoIncrement: true
       },
-      invoice_number: {
-        type: Sequelize.STRING,
-        allowNull: false,
-        unique: true
-      },
       job_id: {
         type: Sequelize.STRING,
-        allowNull: false
+        allowNull: false,
+        references: {
+          model: 'jobs',
+          key: 'id'
+        }
       },
-      job_title: {
-        type: Sequelize.STRING,
-        allowNull: false
+      customer_id: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: 'customers',
+          key: 'id'
+        }
       },
-      customer_name: {
-        type: Sequelize.STRING,
-        allowNull: false
-      },
-      customer_address: {
-        type: Sequelize.TEXT,
-        allowNull: true
-      },
-      project: {
+      site_code: {
         type: Sequelize.STRING,
         allowNull: false
       },
@@ -42,46 +37,50 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false
       },
-      purchase_order_number: {
+      po_no: {
         type: Sequelize.STRING,
         allowNull: false
       },
-      subtotal: {
-        type: Sequelize.DECIMAL(15, 2),
+      line_no: {
+        type: Sequelize.STRING,
         allowNull: false
       },
-      vat_amount: {
-        type: Sequelize.DECIMAL(15, 2),
+      item_code: {
+        type: Sequelize.STRING,
         allowNull: false
       },
-      ssl_amount: {
-        type: Sequelize.DECIMAL(15, 2),
+      item_description: {
+        type: Sequelize.TEXT,
         allowNull: false
       },
-      total_amount: {
-        type: Sequelize.DECIMAL(15, 2),
+      unit_price: {
+        type: Sequelize.DECIMAL(10, 2),
         allowNull: false
       },
-      vat_percentage: {
+      requested_quantity: {
+        type: Sequelize.INTEGER,
+        allowNull: false
+      },
+      invoiced_percentage: {
         type: Sequelize.DECIMAL(5, 2),
-        allowNull: false
+        allowNull: false,
+        defaultValue: 0
       },
-      ssl_percentage: {
-        type: Sequelize.DECIMAL(5, 2),
-        allowNull: false
-      },
-      items: {
-        type: Sequelize.JSON,
+      file_path: {
+        type: Sequelize.STRING,
         allowNull: true
       },
-      created_by: {
-        type: Sequelize.UUID,
-        allowNull: true
-      },
-      created_at: {
+      uploaded_at: {
         type: Sequelize.DATE,
+        allowNull: true
+      },
+      uploaded_by: {
+        type: Sequelize.UUID,
         allowNull: true,
-        defaultValue: Sequelize.NOW
+        references: {
+          model: 'users',
+          key: 'id'
+        }
       },
       createdAt: {
         type: Sequelize.DATE,
@@ -95,6 +94,6 @@ module.exports = {
   },
 
   async down (queryInterface, Sequelize) {
-    await queryInterface.dropTable('ericsson_invoices');
+    await queryInterface.dropTable('huawei_pos');
   }
 };

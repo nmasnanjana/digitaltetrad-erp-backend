@@ -5,48 +5,43 @@ module.exports = {
   async up (queryInterface, Sequelize) {
     await queryInterface.createTable('huawei_invoices', {
       id: {
-        type: Sequelize.UUID,
+        type: Sequelize.INTEGER,
         primaryKey: true,
-        defaultValue: Sequelize.UUIDV4
+        autoIncrement: true
       },
-      invoiceNumber: {
-        type: Sequelize.STRING,
-        allowNull: false,
-        unique: true
-      },
-      customerName: {
+      invoice_no: {
         type: Sequelize.STRING,
         allowNull: false
       },
-      totalAmount: {
-        type: Sequelize.DECIMAL(10, 2),
-        allowNull: false
-      },
-      invoiceDate: {
-        type: Sequelize.DATE,
-        allowNull: false
-      },
-      dueDate: {
-        type: Sequelize.DATE,
-        allowNull: true
-      },
-      status: {
-        type: Sequelize.ENUM('draft', 'sent', 'paid', 'overdue', 'cancelled'),
-        defaultValue: 'draft'
-      },
-      filePath: {
-        type: Sequelize.STRING,
-        allowNull: true
-      },
-      createdBy: {
-        type: Sequelize.UUID,
+      huawei_po_id: {
+        type: Sequelize.INTEGER,
         allowNull: false,
         references: {
-          model: 'users',
+          model: 'huawei_pos',
           key: 'id'
         },
         onUpdate: 'CASCADE',
-        onDelete: 'RESTRICT'
+        onDelete: 'CASCADE'
+      },
+      invoiced_percentage: {
+        type: Sequelize.DECIMAL(5, 2),
+        allowNull: false
+      },
+      vat_percentage: {
+        type: Sequelize.DECIMAL(5, 2),
+        allowNull: false
+      },
+      vat_amount: {
+        type: Sequelize.DECIMAL(10, 2),
+        allowNull: false
+      },
+      subtotal_amount: {
+        type: Sequelize.DECIMAL(10, 2),
+        allowNull: false
+      },
+      total_amount: {
+        type: Sequelize.DECIMAL(10, 2),
+        allowNull: false
       },
       createdAt: {
         type: Sequelize.DATE,
