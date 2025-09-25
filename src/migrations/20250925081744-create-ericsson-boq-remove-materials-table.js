@@ -3,27 +3,37 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up (queryInterface, Sequelize) {
-    await queryInterface.createTable('role_permissions', {
+    await queryInterface.createTable('ericsson_boq_remove_materials', {
       id: {
         type: Sequelize.UUID,
         primaryKey: true,
         defaultValue: Sequelize.UUIDV4
       },
-      roleId: {
+      boqId: {
         type: Sequelize.UUID,
         allowNull: false,
         references: {
-          model: 'roles',
+          model: 'ericsson_boqs',
           key: 'id'
-        }
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
       },
-      permissionId: {
-        type: Sequelize.UUID,
-        allowNull: false,
-        references: {
-          model: 'permissions',
-          key: 'id'
-        }
+      slNo: {
+        type: Sequelize.INTEGER,
+        allowNull: false
+      },
+      materialDescription: {
+        type: Sequelize.TEXT,
+        allowNull: false
+      },
+      qty: {
+        type: Sequelize.INTEGER,
+        allowNull: false
+      },
+      remarks: {
+        type: Sequelize.TEXT,
+        allowNull: true
       },
       createdAt: {
         type: Sequelize.DATE,
@@ -37,6 +47,6 @@ module.exports = {
   },
 
   async down (queryInterface, Sequelize) {
-        await queryInterface.dropTable('role_permissions');
+    await queryInterface.dropTable('ericsson_boq_remove_materials');
   }
 };

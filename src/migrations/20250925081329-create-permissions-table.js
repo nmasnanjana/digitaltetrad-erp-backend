@@ -3,41 +3,23 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up (queryInterface, Sequelize) {
-    await queryInterface.createTable('jobs', {
+    await queryInterface.createTable('permissions', {
       id: {
         type: Sequelize.UUID,
         primaryKey: true,
         defaultValue: Sequelize.UUIDV4
       },
-      jobNumber: {
+      module: {
         type: Sequelize.STRING,
-        allowNull: false,
-        unique: true
+        allowNull: false
       },
-      customerId: {
-        type: Sequelize.UUID,
-        allowNull: false,
-        references: {
-          model: 'customers',
-          key: 'id'
-        }
-      },
-      title: {
+      action: {
         type: Sequelize.STRING,
         allowNull: false
       },
       description: {
-        type: Sequelize.TEXT
-      },
-      status: {
-        type: Sequelize.STRING,
-        defaultValue: 'pending'
-      },
-      startDate: {
-        type: Sequelize.DATE
-      },
-      endDate: {
-        type: Sequelize.DATE
+        type: Sequelize.TEXT,
+        allowNull: true
       },
       isActive: {
         type: Sequelize.BOOLEAN,
@@ -52,9 +34,15 @@ module.exports = {
         allowNull: false
       }
     });
+
+    // Add unique constraint for module + action combination
+    await queryInterface.addIndex('permissions', ['module', 'action'], {
+      unique: true,
+      name: 'permissions_module_action_idx'
+    });
   },
 
   async down (queryInterface, Sequelize) {
-        await queryInterface.dropTable('jobs');
+    await queryInterface.dropTable('permissions');
   }
 };

@@ -3,43 +3,39 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up (queryInterface, Sequelize) {
-    await queryInterface.createTable('ericsson_boq_remove_materials', {
+    await queryInterface.createTable('qc_comments', {
       id: {
         type: Sequelize.UUID,
         primaryKey: true,
         defaultValue: Sequelize.UUIDV4
       },
-      boqId: {
+      jobId: {
         type: Sequelize.UUID,
         allowNull: false,
         references: {
-          model: 'ericsson_boqs',
+          model: 'jobs',
           key: 'id'
-        }
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
       },
-      materialCode: {
-        type: Sequelize.STRING,
-        allowNull: false
-      },
-      materialDescription: {
+      comment: {
         type: Sequelize.TEXT,
         allowNull: false
       },
-      quantity: {
-        type: Sequelize.INTEGER,
-        allowNull: false
+      commentType: {
+        type: Sequelize.ENUM('quality', 'safety', 'progress', 'other'),
+        defaultValue: 'other'
       },
-      unitPrice: {
-        type: Sequelize.DECIMAL,
+      createdBy: {
+        type: Sequelize.UUID,
         allowNull: false,
-        precision: 10,
-        scale: 2
-      },
-      totalPrice: {
-        type: Sequelize.DECIMAL,
-        allowNull: false,
-        precision: 10,
-        scale: 2
+        references: {
+          model: 'users',
+          key: 'id'
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'RESTRICT'
       },
       createdAt: {
         type: Sequelize.DATE,
@@ -53,6 +49,6 @@ module.exports = {
   },
 
   async down (queryInterface, Sequelize) {
-        await queryInterface.dropTable('ericsson_boq_remove_materials');
+    await queryInterface.dropTable('qc_comments');
   }
 };

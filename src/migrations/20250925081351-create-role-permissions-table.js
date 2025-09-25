@@ -3,31 +3,31 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up (queryInterface, Sequelize) {
-    await queryInterface.createTable('team_assignments', {
+    await queryInterface.createTable('role_permissions', {
       id: {
         type: Sequelize.UUID,
         primaryKey: true,
         defaultValue: Sequelize.UUIDV4
       },
-      teamId: {
+      roleId: {
         type: Sequelize.UUID,
         allowNull: false,
         references: {
-          model: 'teams',
+          model: 'roles',
           key: 'id'
-        }
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
       },
-      userId: {
+      permissionId: {
         type: Sequelize.UUID,
         allowNull: false,
         references: {
-          model: 'users',
+          model: 'permissions',
           key: 'id'
-        }
-      },
-      assignedAt: {
-        type: Sequelize.DATE,
-        defaultValue: Sequelize.NOW
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
       },
       createdAt: {
         type: Sequelize.DATE,
@@ -38,9 +38,15 @@ module.exports = {
         allowNull: false
       }
     });
+
+    // Add unique constraint for role + permission combination
+    await queryInterface.addIndex('role_permissions', ['roleId', 'permissionId'], {
+      unique: true,
+      name: 'role_permissions_unique_idx'
+    });
   },
 
   async down (queryInterface, Sequelize) {
-        await queryInterface.dropTable('team_assignments');
+    await queryInterface.dropTable('role_permissions');
   }
 };

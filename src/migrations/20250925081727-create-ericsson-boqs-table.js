@@ -3,48 +3,50 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up (queryInterface, Sequelize) {
-    await queryInterface.createTable('users', {
+    await queryInterface.createTable('ericsson_boqs', {
       id: {
         type: Sequelize.UUID,
         primaryKey: true,
         defaultValue: Sequelize.UUIDV4
       },
-      firstName: {
-        type: Sequelize.STRING,
-        allowNull: false
-      },
-      lastName: {
-        type: Sequelize.STRING,
-        allowNull: false
-      },
-      username: {
+      boqNumber: {
         type: Sequelize.STRING,
         allowNull: false,
         unique: true
       },
-      password: {
+      projectName: {
         type: Sequelize.STRING,
         allowNull: false
       },
-      email: {
+      customerName: {
         type: Sequelize.STRING,
-        allowNull: false,
-        unique: true
+        allowNull: false
       },
-      roleId: {
+      totalAmount: {
+        type: Sequelize.DECIMAL(10, 2),
+        allowNull: false
+      },
+      boqDate: {
+        type: Sequelize.DATE,
+        allowNull: false
+      },
+      status: {
+        type: Sequelize.ENUM('draft', 'approved', 'in_progress', 'completed', 'cancelled'),
+        defaultValue: 'draft'
+      },
+      filePath: {
+        type: Sequelize.STRING,
+        allowNull: true
+      },
+      createdBy: {
         type: Sequelize.UUID,
         allowNull: false,
         references: {
-          model: 'roles',
+          model: 'users',
           key: 'id'
-        }
-      },
-      isActive: {
-        type: Sequelize.BOOLEAN,
-        defaultValue: true
-      },
-      lastLogin: {
-        type: Sequelize.DATE
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'RESTRICT'
       },
       createdAt: {
         type: Sequelize.DATE,
@@ -58,6 +60,6 @@ module.exports = {
   },
 
   async down (queryInterface, Sequelize) {
-        await queryInterface.dropTable('users');
+    await queryInterface.dropTable('ericsson_boqs');
   }
 };

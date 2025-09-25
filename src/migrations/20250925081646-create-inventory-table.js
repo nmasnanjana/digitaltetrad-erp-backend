@@ -3,44 +3,44 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up (queryInterface, Sequelize) {
-    await queryInterface.createTable('huawei_invoices', {
+    await queryInterface.createTable('inventory', {
       id: {
         type: Sequelize.UUID,
         primaryKey: true,
         defaultValue: Sequelize.UUIDV4
       },
-      jobId: {
-        type: Sequelize.UUID,
-        allowNull: false,
-        references: {
-          model: 'jobs',
-          key: 'id'
-        }
-      },
-      invoiceNumber: {
+      itemName: {
         type: Sequelize.STRING,
-        allowNull: false,
-        unique: true
-      },
-      invoiceDate: {
-        type: Sequelize.DATE,
         allowNull: false
       },
-      totalAmount: {
-        type: Sequelize.DECIMAL,
+      description: {
+        type: Sequelize.TEXT,
+        allowNull: true
+      },
+      quantity: {
+        type: Sequelize.INTEGER,
         allowNull: false,
-        precision: 10,
-        scale: 2
+        defaultValue: 0
       },
-      status: {
+      unit: {
         type: Sequelize.STRING,
-        defaultValue: 'pending'
+        allowNull: false
       },
-      paymentDate: {
-        type: Sequelize.DATE
+      unitPrice: {
+        type: Sequelize.DECIMAL(10, 2),
+        allowNull: false
       },
-      notes: {
-        type: Sequelize.TEXT
+      supplier: {
+        type: Sequelize.STRING,
+        allowNull: true
+      },
+      location: {
+        type: Sequelize.STRING,
+        allowNull: true
+      },
+      isActive: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: true
       },
       createdAt: {
         type: Sequelize.DATE,
@@ -54,6 +54,6 @@ module.exports = {
   },
 
   async down (queryInterface, Sequelize) {
-        await queryInterface.dropTable('huawei_invoices');
+    await queryInterface.dropTable('inventory');
   }
 };

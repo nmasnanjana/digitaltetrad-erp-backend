@@ -3,53 +3,50 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up (queryInterface, Sequelize) {
-    await queryInterface.createTable('qc_comments', {
+    await queryInterface.createTable('huawei_invoices', {
       id: {
         type: Sequelize.UUID,
         primaryKey: true,
         defaultValue: Sequelize.UUIDV4
       },
-      jobId: {
-        type: Sequelize.UUID,
+      invoiceNumber: {
+        type: Sequelize.STRING,
         allowNull: false,
-        references: {
-          model: 'jobs',
-          key: 'id'
-        }
+        unique: true
       },
-      comment: {
-        type: Sequelize.TEXT,
-        allowNull: false
-      },
-      commentType: {
+      customerName: {
         type: Sequelize.STRING,
         allowNull: false
       },
-      severity: {
-        type: Sequelize.STRING,
-        defaultValue: 'medium'
+      totalAmount: {
+        type: Sequelize.DECIMAL(10, 2),
+        allowNull: false
+      },
+      invoiceDate: {
+        type: Sequelize.DATE,
+        allowNull: false
+      },
+      dueDate: {
+        type: Sequelize.DATE,
+        allowNull: true
       },
       status: {
-        type: Sequelize.STRING,
-        defaultValue: 'open'
+        type: Sequelize.ENUM('draft', 'sent', 'paid', 'overdue', 'cancelled'),
+        defaultValue: 'draft'
       },
-      reportedBy: {
+      filePath: {
+        type: Sequelize.STRING,
+        allowNull: true
+      },
+      createdBy: {
         type: Sequelize.UUID,
         allowNull: false,
         references: {
           model: 'users',
           key: 'id'
-        }
-      },
-      resolvedBy: {
-        type: Sequelize.UUID,
-        references: {
-          model: 'users',
-          key: 'id'
-        }
-      },
-      resolvedAt: {
-        type: Sequelize.DATE
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'RESTRICT'
       },
       createdAt: {
         type: Sequelize.DATE,
@@ -63,6 +60,6 @@ module.exports = {
   },
 
   async down (queryInterface, Sequelize) {
-        await queryInterface.dropTable('qc_comments');
+    await queryInterface.dropTable('huawei_invoices');
   }
 };

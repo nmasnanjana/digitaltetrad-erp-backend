@@ -15,7 +15,8 @@ module.exports = {
         unique: true
       },
       description: {
-        type: Sequelize.STRING
+        type: Sequelize.TEXT,
+        allowNull: true
       },
       isActive: {
         type: Sequelize.BOOLEAN,
@@ -33,6 +34,6 @@ module.exports = {
   },
 
   async down (queryInterface, Sequelize) {
-        await queryInterface.dropTable('operation_types');
+    await queryInterface.dropTable('operation_types');
   }
 };

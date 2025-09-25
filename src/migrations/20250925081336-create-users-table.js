@@ -3,34 +3,51 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up (queryInterface, Sequelize) {
-    await queryInterface.createTable('permissions', {
+    await queryInterface.createTable('users', {
       id: {
         type: Sequelize.UUID,
-        defaultValue: Sequelize.UUIDV4,
         primaryKey: true,
-        allowNull: false
+        defaultValue: Sequelize.UUIDV4
       },
-      name: {
+      username: {
         type: Sequelize.STRING,
         allowNull: false,
         unique: true
       },
-      module: {
+      email: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        unique: true
+      },
+      password: {
         type: Sequelize.STRING,
         allowNull: false
       },
-      action: {
+      firstName: {
         type: Sequelize.STRING,
         allowNull: false
       },
-      description: {
+      lastName: {
         type: Sequelize.STRING,
-        allowNull: true
+        allowNull: false
+      },
+      roleId: {
+        type: Sequelize.UUID,
+        allowNull: false,
+        references: {
+          model: 'roles',
+          key: 'id'
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'RESTRICT'
       },
       isActive: {
         type: Sequelize.BOOLEAN,
-        defaultValue: true,
-        allowNull: false
+        defaultValue: true
+      },
+      lastLogin: {
+        type: Sequelize.DATE,
+        allowNull: true
       },
       createdAt: {
         type: Sequelize.DATE,
@@ -41,16 +58,9 @@ module.exports = {
         allowNull: false
       }
     });
-
-    // Add unique index for module and action
-    await queryInterface.addIndex('permissions', {
-      fields: ['module', 'action'],
-      unique: true,
-      name: 'permissions_module_action_idx'
-    });
   },
 
   async down (queryInterface, Sequelize) {
-    await queryInterface.dropTable('permissions');
+    await queryInterface.dropTable('users');
   }
 };
