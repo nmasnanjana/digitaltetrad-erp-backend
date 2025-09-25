@@ -5,35 +5,43 @@ module.exports = {
   async up (queryInterface, Sequelize) {
     await queryInterface.createTable('ericsson_boq_remove_materials', {
       id: {
-        type: Sequelize.UUID,
+        type: Sequelize.INTEGER,
         primaryKey: true,
-        defaultValue: Sequelize.UUIDV4
+        autoIncrement: true
       },
-      boqId: {
-        type: Sequelize.UUID,
+      boq_id: {
+        type: Sequelize.INTEGER,
         allowNull: false,
         references: {
           model: 'ericsson_boqs',
           key: 'id'
-        },
-        onUpdate: 'CASCADE',
-        onDelete: 'CASCADE'
+        }
       },
-      slNo: {
-        type: Sequelize.INTEGER,
+      sl_no: {
+        type: Sequelize.STRING,
         allowNull: false
       },
-      materialDescription: {
+      material_description: {
         type: Sequelize.TEXT,
         allowNull: false
       },
       qty: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.STRING,
         allowNull: false
       },
       remarks: {
         type: Sequelize.TEXT,
         allowNull: true
+      },
+      uploaded_at: {
+        type: Sequelize.DATE,
+        allowNull: true,
+        defaultValue: Sequelize.NOW
+      },
+      uploaded_by: {
+        type: Sequelize.UUID,
+        allowNull: true,
+        defaultValue: null
       },
       createdAt: {
         type: Sequelize.DATE,

@@ -5,39 +5,71 @@ module.exports = {
   async up (queryInterface, Sequelize) {
     await queryInterface.createTable('ericsson_boq_items', {
       id: {
-        type: Sequelize.UUID,
+        type: Sequelize.INTEGER,
         primaryKey: true,
-        defaultValue: Sequelize.UUIDV4
+        autoIncrement: true
       },
-      boqId: {
-        type: Sequelize.UUID,
+      boq_id: {
+        type: Sequelize.INTEGER,
         allowNull: false,
         references: {
           model: 'ericsson_boqs',
           key: 'id'
-        },
-        onUpdate: 'CASCADE',
-        onDelete: 'CASCADE'
+        }
       },
-      itemCode: {
+      service_number: {
         type: Sequelize.STRING,
         allowNull: false
       },
-      itemDescription: {
+      item_description: {
         type: Sequelize.TEXT,
         allowNull: false
       },
-      quantity: {
+      uom: {
+        type: Sequelize.STRING,
+        allowNull: false
+      },
+      qty: {
+        type: Sequelize.DECIMAL(10, 2),
+        allowNull: false
+      },
+      unit_price: {
+        type: Sequelize.DECIMAL(10, 2),
+        allowNull: false,
+        defaultValue: 0
+      },
+      total_amount: {
+        type: Sequelize.DECIMAL(10, 2),
+        allowNull: false,
+        defaultValue: 0
+      },
+      is_additional_work: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
+      },
+      rate_card_id: {
         type: Sequelize.INTEGER,
-        allowNull: false
+        allowNull: true,
+        references: {
+          model: 'ericsson_rate_cards',
+          key: 'id'
+        }
       },
-      unitPrice: {
-        type: Sequelize.DECIMAL(10, 2),
-        allowNull: false
+      invoiced_percentage: {
+        type: Sequelize.DECIMAL(5, 2),
+        allowNull: false,
+        defaultValue: 0
       },
-      totalPrice: {
-        type: Sequelize.DECIMAL(10, 2),
-        allowNull: false
+      uploaded_at: {
+        type: Sequelize.DATE,
+        allowNull: true,
+        defaultValue: Sequelize.NOW
+      },
+      uploaded_by: {
+        type: Sequelize.UUID,
+        allowNull: true,
+        defaultValue: null
       },
       createdAt: {
         type: Sequelize.DATE,
