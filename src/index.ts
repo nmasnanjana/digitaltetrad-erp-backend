@@ -10,6 +10,10 @@ import Role from './models/role';
 import Permission from './models/permission';
 import RolePermission from './models/rolePermission';
 import User from './models/user';
+import HuaweiPo from './models/huaweiPo';
+import HuaweiInvoice from './models/huaweiInvoice';
+import Job from './models/job';
+import Customer from './models/customer';
 
 dotenv.config();
 
@@ -26,77 +30,6 @@ app.use(cors({
 app.use(express.json());
 app.use('/api', webRoutes);
 
-// Custom sync function to handle tables individually
-async function customSync() {
-    try {
-        const queryInterface = sequelize.getQueryInterface();
-        
-        // Get all table names
-        const tables = await queryInterface.showAllTables();
-        logger.info(`Found ${tables.length} existing tables`);
-        
-        // Import all models
-        const User = require('./models/user').default;
-        const Role = require('./models/role').default;
-        const Permission = require('./models/permission').default;
-        const RolePermission = require('./models/rolePermission').default;
-        const Customer = require('./models/customer').default;
-        const Team = require('./models/team').default;
-        const TeamAssignment = require('./models/teamAssignment').default;
-        const Job = require('./models/job').default;
-        const ExpenseType = require('./models/expenseType').default;
-        const OperationType = require('./models/operationType').default;
-        const Expense = require('./models/expense').default;
-        const PurchaseOrder = require('./models/purchaseOrder').default;
-        const QCComment = require('./models/qcComment').default;
-        const Inventory = require('./models/inventory').default;
-        const HuaweiPo = require('./models/huaweiPo').default;
-        const HuaweiInvoice = require('./models/huaweiInvoice').default;
-        const Settings = require('./models/settings').default;
-        
-        // Define table creation order (base tables first, then dependent tables)
-        const tableOrder = [
-            { name: 'roles', model: Role },
-            { name: 'users', model: User },
-            { name: 'permissions', model: Permission },
-            { name: 'role_permissions', model: RolePermission },
-            { name: 'customers', model: Customer },
-            { name: 'teams', model: Team },
-            { name: 'team_assignments', model: TeamAssignment },
-            { name: 'jobs', model: Job },
-            { name: 'expense_types', model: ExpenseType },
-            { name: 'operation_types', model: OperationType },
-            { name: 'expenses', model: Expense },
-            { name: 'purchase_orders', model: PurchaseOrder },
-            { name: 'qc_comments', model: QCComment },
-            { name: 'inventory', model: Inventory },
-            { name: 'huawei_pos', model: HuaweiPo },
-            { name: 'huawei_invoices', model: HuaweiInvoice },
-            { name: 'settings', model: Settings }
-        ];
-        
-        // Create or sync tables in order
-        for (const table of tableOrder) {
-            const tableExists = tables.includes(table.name);
-            
-            if (!tableExists) {
-                logger.info(`Creating ${table.name} table...`);
-                await table.model.sync({ force: false });
-                logger.info(`${table.name} table created successfully`);
-            } else {
-                logger.info(`${table.name} table exists, syncing to add missing columns...`);
-                await table.model.sync({ alter: true });
-                logger.info(`${table.name} table synced successfully`);
-            }
-        }
-        
-        logger.info('Custom sync completed successfully');
-        
-    } catch (error) {
-        logger.error('Error in custom sync:', error);
-        throw error;
-    }
-}
 
 // Function to create developer role and assign permissions
 async function setupDeveloperRole() {
@@ -181,9 +114,9 @@ const startServer = async () => {
         setupAssociations();
         logger.info("Model associations set up successfully.");
 
-        // Use custom sync to avoid index issues
-        // await customSync();
-        // logger.info("Database synchronized successfully using custom sync.");
+        // Database tables should be created using migrations
+        // Run: npm run db:migrate to create tables
+        logger.info("Database connection established. Make sure to run migrations if tables don't exist.");
 
         // Then scan and sync permissions
         const scanner = new PermissionScanner();

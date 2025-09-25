@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 import jwt from "jsonwebtoken";
 import Role from "../models/role";
 import Permission from "../models/permission";
+import { Op } from "sequelize";
 
 dotenv.config();
 
@@ -56,19 +57,57 @@ class UserController {
         }
     }
 
-    // get all registered users and their roles
+    // get all registered users and their roles with pagination
     static async getAllUsers(req: Request, res: Response): Promise<any> {
         try {
+            const page = parseInt(req.query.page as string) || 1;
+            const limit = parseInt(req.query.limit as string) || 10;
+            const search = req.query.search as string || '';
+            const offset = (page - 1) * limit;
+            
+            // Build where clause for search
+            const whereClause: any = {};
+            if (search) {
+                whereClause[Op.or] = [
+                    { firstName: { [Op.like]: `%${search}%` } },
+                    { lastName: { [Op.like]: `%${search}%` } },
+                    { username: { [Op.like]: `%${search}%` } },
+                    { email: { [Op.like]: `%${search}%` } }
+                ];
+            }
+            
+            // Get total count for pagination
+            const totalCount = await User.count({ where: whereClause });
+            
+            // Get users with pagination
             const users = await User.findAll({
                 attributes: ['id', 'firstName', 'lastName', 'username', 'roleId', 'email', 'isActive', 'lastLogin'],
                 include: [{
                     model: Role,
                     as: 'role',
                     attributes: ['name']
-                }]
+                }],
+                where: whereClause,
+                limit: limit,
+                offset: offset,
+                order: [['createdAt', 'DESC']]
             });
 
-            return res.status(200).json(users);
+            const totalPages = Math.ceil(totalCount / limit);
+            const hasNextPage = page < totalPages;
+            const hasPrevPage = page > 1;
+
+            return res.status(200).json({
+                users: users,
+                pagination: {
+                    currentPage: page,
+                    totalPages: totalPages,
+                    totalCount: totalCount,
+                    limit: limit,
+                    hasNextPage: hasNextPage,
+                    hasPrevPage: hasPrevPage
+                }
+            });
         } catch (e: unknown) {
             if (e instanceof Error) {
                 logger.error(e.message);

@@ -4,6 +4,9 @@ import { checkPermission } from "../middleware/checkPermission";
 
 const router = express.Router();
 
+// Public endpoint to get logo and company name (no auth required)
+router.get("/public", SettingsController.getPublicSettings);
+
 // Get settings
 router.get("/", 
     checkPermission('settings', 'read'),

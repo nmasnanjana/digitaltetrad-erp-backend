@@ -43,7 +43,7 @@ class JobController {
         }
     }
 
-    // Get all jobs
+    // Get all jobs with pagination and filters
     static async getAllJobs(req: Request, res: Response): Promise<any> {
         try {
             const {
@@ -53,8 +53,15 @@ class JobController {
                 completedEndDate,
                 status,
                 type,
-                customer_id
+                customer_id,
+                page,
+                limit,
+                search
             } = req.query;
+
+            const currentPage = parseInt(page as string) || 1;
+            const itemsPerPage = parseInt(limit as string) || 10;
+            const offset = (currentPage - 1) * itemsPerPage;
 
             const where: any = {};
 
@@ -107,14 +114,43 @@ class JobController {
                 where.customer_id = customer_id;
             }
 
+            // Add search functionality
+            if (search) {
+                where[Op.or] = [
+                    { name: { [Op.like]: `%${search}%` } },
+                    { id: { [Op.like]: `%${search}%` } }
+                ];
+            }
+
+            // Get total count for pagination
+            const totalCount = await Job.count({ where });
+
             const jobs = await Job.findAll({
                 where,
                 include: [
                     { model: Job.sequelize?.models.Team, as: 'team' },
                     { model: Job.sequelize?.models.Customer, as: 'customer' }
-                ]
+                ],
+                order: [["createdAt", "DESC"]],
+                limit: itemsPerPage,
+                offset
             });
-            return res.status(200).json(jobs);
+
+            const totalPages = Math.ceil(totalCount / itemsPerPage);
+            const hasNextPage = currentPage < totalPages;
+            const hasPrevPage = currentPage > 1;
+
+            res.json({
+                jobs,
+                pagination: {
+                    currentPage,
+                    totalPages,
+                    totalCount,
+                    limit: itemsPerPage,
+                    hasNextPage,
+                    hasPrevPage
+                }
+            });
         } catch (e: unknown) {
             if (e instanceof Error) {
                 logger.error(e.message);

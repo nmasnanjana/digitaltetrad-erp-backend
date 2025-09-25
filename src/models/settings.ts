@@ -5,6 +5,7 @@ interface SettingsAttributes {
     id: number;
     currency: string;
     vat_percentage: number;
+    ssl_percentage: number;
     vat_number: string;
     business_registration_number: string;
     contact_number: string;
@@ -14,7 +15,7 @@ interface SettingsAttributes {
     company_address: string;
     company_logo: string;
     bank_account: string;
-    updated_by?: string;
+    updated_by?: string | null;
 }
 
 interface SettingsCreationAttributes extends Omit<SettingsAttributes, 'id'> {}
@@ -23,6 +24,7 @@ class Settings extends Model<SettingsAttributes, SettingsCreationAttributes> imp
     public id!: number;
     public currency!: string;
     public vat_percentage!: number;
+    public ssl_percentage!: number;
     public vat_number!: string;
     public business_registration_number!: string;
     public contact_number!: string;
@@ -32,7 +34,7 @@ class Settings extends Model<SettingsAttributes, SettingsCreationAttributes> imp
     public company_address!: string;
     public company_logo!: string;
     public bank_account!: string;
-    public updated_by?: string;
+    public updated_by?: string | null;
 }
 
 Settings.init(
@@ -48,6 +50,15 @@ Settings.init(
             defaultValue: 'USD',
         },
         vat_percentage: {
+            type: DataTypes.DECIMAL(5, 2),
+            allowNull: false,
+            defaultValue: 0.00,
+            validate: {
+                min: 0,
+                max: 100
+            }
+        },
+        ssl_percentage: {
             type: DataTypes.DECIMAL(5, 2),
             allowNull: false,
             defaultValue: 0.00,
@@ -107,7 +118,7 @@ Settings.init(
             comment: 'Multi-line company address'
         },
         company_logo: {
-            type: DataTypes.TEXT,
+            type: DataTypes.TEXT('long'),
             allowNull: true,
             comment: 'Base64 encoded company logo'
         },
@@ -119,6 +130,7 @@ Settings.init(
         updated_by: {
             type: DataTypes.STRING,
             allowNull: true,
+            defaultValue: null,
         }
     },
     {

@@ -2,11 +2,31 @@ import { Request, Response } from "express";
 import Role from "../models/role";
 import Permission from "../models/permission";
 import logger from "../utils/logger";
+import { Op } from "sequelize";
 
 class RoleController {
-    // Get all roles
+    // Get all roles with pagination and search
     static async getAllRoles(req: Request, res: Response): Promise<any> {
         try {
+            const page = parseInt(req.query.page as string) || 1;
+            const limit = parseInt(req.query.limit as string) || 10;
+            const search = req.query.search as string || '';
+            
+            const offset = (page - 1) * limit;
+            
+            // Build where clause for search
+            const whereClause: any = { isActive: true };
+            if (search) {
+                whereClause[Op.or] = [
+                    { name: { [Op.like]: `%${search}%` } },
+                    { description: { [Op.like]: `%${search}%` } }
+                ];
+            }
+            
+            // Get total count for pagination
+            const totalCount = await Role.count({ where: whereClause });
+            
+            // Get roles with pagination
             const roles = await Role.findAll({
                 include: [{
                     model: Permission,
@@ -14,10 +34,27 @@ class RoleController {
                     where: { isActive: true },
                     required: false
                 }],
-                where: { isActive: true },
+                where: whereClause,
                 order: [["name", "ASC"]],
+                limit,
+                offset
             });
-            res.json(roles);
+            
+            const totalPages = Math.ceil(totalCount / limit);
+            const hasNextPage = page < totalPages;
+            const hasPrevPage = page > 1;
+            
+            res.json({
+                roles,
+                pagination: {
+                    currentPage: page,
+                    totalPages,
+                    totalCount,
+                    limit,
+                    hasNextPage,
+                    hasPrevPage
+                }
+            });
         } catch (error) {
             logger.error("Error getting roles:", error);
             res.status(500).json({ error: "Internal server error" });

@@ -14,6 +14,8 @@ import Permission from "./permission";
 import RolePermission from "./rolePermission";
 import HuaweiPo from "./huaweiPo";
 import HuaweiInvoice from "./huaweiInvoice";
+import EricssonRateCard from "./ericssonRateCard";
+import EricssonInvoice from "./ericssonInvoice";
 
 // Role-User relationship
 User.belongsTo(Role, { foreignKey: 'roleId', as: 'role' });
@@ -69,7 +71,50 @@ User.hasMany(HuaweiPo, { foreignKey: 'uploaded_by', as: 'uploadedHuaweiPos' });
 
 // Huawei Invoice relationships
 HuaweiInvoice.belongsTo(HuaweiPo, { foreignKey: 'huawei_po_id', as: 'huaweiPo' });
-HuaweiPo.hasOne(HuaweiInvoice, { foreignKey: 'huawei_po_id', as: 'huaweiInvoice' });
+HuaweiPo.hasMany(HuaweiInvoice, { foreignKey: 'huawei_po_id', as: 'huaweiInvoices' });
+
+// Ericsson Rate Card relationships
+EricssonRateCard.belongsTo(User, { foreignKey: 'uploaded_by', as: 'uploader' });
+User.hasMany(EricssonRateCard, { foreignKey: 'uploaded_by', as: 'uploadedEricssonRateCards' });
+
+// Ericsson BOQ relationships
+import EricssonBoq from "./ericssonBoq";
+import EricssonBoqItem from "./ericssonBoqItem";
+import EricssonBoqRemoveMaterial from "./ericssonBoqRemoveMaterial";
+import EricssonBoqSurplusMaterial from "./ericssonBoqSurplusMaterial";
+
+// Ericsson Invoice relationships
+EricssonInvoice.belongsTo(User, { foreignKey: 'created_by', as: 'creator' });
+User.hasMany(EricssonInvoice, { foreignKey: 'created_by', as: 'createdEricssonInvoices' });
+
+EricssonInvoice.belongsTo(Job, { foreignKey: 'job_id', as: 'job' });
+Job.hasMany(EricssonInvoice, { foreignKey: 'job_id', as: 'ericssonInvoices' });
+
+EricssonBoq.belongsTo(User, { foreignKey: 'uploaded_by', as: 'uploader' });
+User.hasMany(EricssonBoq, { foreignKey: 'uploaded_by', as: 'uploadedEricssonBoqs' });
+
+EricssonBoqItem.belongsTo(User, { foreignKey: 'uploaded_by', as: 'uploader' });
+User.hasMany(EricssonBoqItem, { foreignKey: 'uploaded_by', as: 'uploadedEricssonBoqItems' });
+
+EricssonBoqRemoveMaterial.belongsTo(User, { foreignKey: 'uploaded_by', as: 'uploader' });
+User.hasMany(EricssonBoqRemoveMaterial, { foreignKey: 'uploaded_by', as: 'uploadedEricssonBoqRemoveMaterials' });
+
+EricssonBoqSurplusMaterial.belongsTo(User, { foreignKey: 'uploaded_by', as: 'uploader' });
+User.hasMany(EricssonBoqSurplusMaterial, { foreignKey: 'uploaded_by', as: 'uploadedEricssonBoqSurplusMaterials' });
+
+// BOQ relationships
+EricssonBoq.hasMany(EricssonBoqItem, { foreignKey: 'boq_id', as: 'items' });
+EricssonBoqItem.belongsTo(EricssonBoq, { foreignKey: 'boq_id', as: 'boq' });
+
+EricssonBoq.hasMany(EricssonBoqRemoveMaterial, { foreignKey: 'boq_id', as: 'removeMaterials' });
+EricssonBoqRemoveMaterial.belongsTo(EricssonBoq, { foreignKey: 'boq_id', as: 'boq' });
+
+EricssonBoq.hasMany(EricssonBoqSurplusMaterial, { foreignKey: 'boq_id', as: 'surplusMaterials' });
+EricssonBoqSurplusMaterial.belongsTo(EricssonBoq, { foreignKey: 'boq_id', as: 'boq' });
+
+// Rate card relationship with BOQ items
+EricssonBoqItem.belongsTo(EricssonRateCard, { foreignKey: 'rate_card_id', as: 'rateCard' });
+EricssonRateCard.hasMany(EricssonBoqItem, { foreignKey: 'rate_card_id', as: 'boqItems' });
 
 // Export setup in case needed
 export const setupAssociations = () => {
