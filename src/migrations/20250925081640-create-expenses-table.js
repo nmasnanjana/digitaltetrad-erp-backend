@@ -5,20 +5,12 @@ module.exports = {
   async up (queryInterface, Sequelize) {
     await queryInterface.createTable('expenses', {
       id: {
-        type: Sequelize.UUID,
+        type: Sequelize.INTEGER,
         primaryKey: true,
-        defaultValue: Sequelize.UUIDV4
+        autoIncrement: true
       },
-      amount: {
-        type: Sequelize.DECIMAL(10, 2),
-        allowNull: false
-      },
-      description: {
-        type: Sequelize.TEXT,
-        allowNull: false
-      },
-      expenseTypeId: {
-        type: Sequelize.UUID,
+      expenses_type_id: {
+        type: Sequelize.INTEGER,
         allowNull: false,
         references: {
           model: 'expense_types',
@@ -27,9 +19,14 @@ module.exports = {
         onUpdate: 'CASCADE',
         onDelete: 'RESTRICT'
       },
-      operationTypeId: {
-        type: Sequelize.UUID,
+      operations: {
+        type: Sequelize.BOOLEAN,
         allowNull: false,
+        defaultValue: false
+      },
+      operation_type_id: {
+        type: Sequelize.INTEGER,
+        allowNull: true,
         references: {
           model: 'operation_types',
           key: 'id'
@@ -37,31 +34,25 @@ module.exports = {
         onUpdate: 'CASCADE',
         onDelete: 'RESTRICT'
       },
-      jobId: {
-        type: Sequelize.UUID,
-        allowNull: false,
+      job_id: {
+        type: Sequelize.STRING,
+        allowNull: true,
         references: {
           model: 'jobs',
           key: 'id'
         },
         onUpdate: 'CASCADE',
-        onDelete: 'RESTRICT'
+        onDelete: 'SET NULL'
       },
-      userId: {
-        type: Sequelize.UUID,
-        allowNull: false,
-        references: {
-          model: 'users',
-          key: 'id'
-        },
-        onUpdate: 'CASCADE',
-        onDelete: 'RESTRICT'
+      description: {
+        type: Sequelize.TEXT,
+        allowNull: false
       },
-      status: {
-        type: Sequelize.ENUM('pending', 'approved', 'rejected', 'paid'),
-        defaultValue: 'pending'
+      amount: {
+        type: Sequelize.FLOAT,
+        allowNull: false
       },
-      approvedBy: {
+      edited_by: {
         type: Sequelize.UUID,
         allowNull: true,
         references: {
@@ -69,19 +60,39 @@ module.exports = {
           key: 'id'
         },
         onUpdate: 'CASCADE',
-        onDelete: 'SET NULL'
+        onDelete: 'RESTRICT'
       },
-      approvedAt: {
+      reason_to_edit: {
+        type: Sequelize.TEXT,
+        allowNull: true
+      },
+      reviewed_by: {
+        type: Sequelize.UUID,
+        allowNull: true,
+        references: {
+          model: 'users',
+          key: 'id'
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'RESTRICT'
+      },
+      reviewer_comment: {
+        type: Sequelize.TEXT,
+        allowNull: true
+      },
+      status: {
+        type: Sequelize.ENUM('on_progress', 'approved', 'denied'),
+        allowNull: true,
+        defaultValue: 'on_progress'
+      },
+      reviewed_at: {
         type: Sequelize.DATE,
         allowNull: true
       },
-      paidAt: {
-        type: Sequelize.DATE,
-        allowNull: true
-      },
-      receiptPath: {
-        type: Sequelize.STRING,
-        allowNull: true
+      paid: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
       },
       createdAt: {
         type: Sequelize.DATE,

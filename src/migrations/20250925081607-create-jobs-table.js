@@ -5,25 +5,36 @@ module.exports = {
   async up (queryInterface, Sequelize) {
     await queryInterface.createTable('jobs', {
       id: {
-        type: Sequelize.UUID,
-        primaryKey: true,
-        defaultValue: Sequelize.UUIDV4
-      },
-      jobNumber: {
         type: Sequelize.STRING,
+        primaryKey: true,
         allowNull: false,
         unique: true
       },
-      title: {
+      name: {
         type: Sequelize.STRING,
         allowNull: false
       },
-      description: {
-        type: Sequelize.TEXT,
-        allowNull: true
+      status: {
+        type: Sequelize.ENUM('open', 'in progress', 'installed', 'qc', 'pat', 'closed'),
+        allowNull: false,
+        defaultValue: 'open'
       },
-      customerId: {
-        type: Sequelize.UUID,
+      type: {
+        type: Sequelize.ENUM('supply and installation', 'installation', 'maintenance'),
+        allowNull: false
+      },
+      team_id: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: 'teams',
+          key: 'id'
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'RESTRICT'
+      },
+      customer_id: {
+        type: Sequelize.INTEGER,
         allowNull: false,
         references: {
           model: 'customers',
@@ -32,21 +43,9 @@ module.exports = {
         onUpdate: 'CASCADE',
         onDelete: 'RESTRICT'
       },
-      status: {
-        type: Sequelize.ENUM('pending', 'in_progress', 'completed', 'cancelled'),
-        defaultValue: 'pending'
-      },
-      startDate: {
+      completed_at: {
         type: Sequelize.DATE,
         allowNull: true
-      },
-      endDate: {
-        type: Sequelize.DATE,
-        allowNull: true
-      },
-      isActive: {
-        type: Sequelize.BOOLEAN,
-        defaultValue: true
       },
       createdAt: {
         type: Sequelize.DATE,
