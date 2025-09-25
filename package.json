@@ -21,6 +21,8 @@
     "db:reset": "npx sequelize-cli db:drop && npx sequelize-cli db:create && npx sequelize-cli db:migrate && npx sequelize-cli db:seed:all",
     "db:create": "npx sequelize-cli db:create",
     "db:drop": "npx sequelize-cli db:drop",
+    "db:sync": "npx ts-node src/scripts/sync-database.ts",
+    "db:sync:force": "npx ts-node src/scripts/sync-database.ts --force",
     "setup": "npm run db:migrate && npm run start",
     "setup:prod": "npm run build && npm run db:migrate && npm run start:prod"
   },

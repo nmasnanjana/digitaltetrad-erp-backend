@@ -118,7 +118,7 @@ Settings.init(
             comment: 'Multi-line company address'
         },
         company_logo: {
-            type: DataTypes.TEXT,
+            type: DataTypes.TEXT('long'),
             allowNull: true,
             comment: 'Base64 encoded company logo'
         },
