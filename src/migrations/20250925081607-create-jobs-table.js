@@ -3,48 +3,50 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up (queryInterface, Sequelize) {
-    await queryInterface.createTable('purchase_orders', {
+    await queryInterface.createTable('jobs', {
       id: {
         type: Sequelize.UUID,
         primaryKey: true,
         defaultValue: Sequelize.UUIDV4
       },
-      jobId: {
-        type: Sequelize.UUID,
-        allowNull: false,
-        references: {
-          model: 'jobs',
-          key: 'id'
-        }
-      },
-      poNumber: {
+      jobNumber: {
         type: Sequelize.STRING,
         allowNull: false,
         unique: true
       },
-      supplier: {
+      title: {
         type: Sequelize.STRING,
         allowNull: false
       },
-      totalAmount: {
-        type: Sequelize.DECIMAL,
+      description: {
+        type: Sequelize.TEXT,
+        allowNull: true
+      },
+      customerId: {
+        type: Sequelize.UUID,
         allowNull: false,
-        precision: 10,
-        scale: 2
+        references: {
+          model: 'customers',
+          key: 'id'
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'RESTRICT'
       },
       status: {
-        type: Sequelize.STRING,
+        type: Sequelize.ENUM('pending', 'in_progress', 'completed', 'cancelled'),
         defaultValue: 'pending'
       },
-      orderDate: {
+      startDate: {
         type: Sequelize.DATE,
-        allowNull: false
+        allowNull: true
       },
-      expectedDelivery: {
-        type: Sequelize.DATE
+      endDate: {
+        type: Sequelize.DATE,
+        allowNull: true
       },
-      notes: {
-        type: Sequelize.TEXT
+      isActive: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: true
       },
       createdAt: {
         type: Sequelize.DATE,
@@ -58,6 +60,6 @@ module.exports = {
   },
 
   async down (queryInterface, Sequelize) {
-        await queryInterface.dropTable('purchase_orders');
+    await queryInterface.dropTable('jobs');
   }
 };

@@ -3,51 +3,46 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up (queryInterface, Sequelize) {
-    await queryInterface.createTable('ericsson_boqs', {
+    await queryInterface.createTable('huawei_pos', {
       id: {
         type: Sequelize.UUID,
         primaryKey: true,
         defaultValue: Sequelize.UUIDV4
       },
-      jobId: {
-        type: Sequelize.UUID,
-        allowNull: false,
-        references: {
-          model: 'jobs',
-          key: 'id'
-        }
-      },
-      boqNumber: {
+      poNumber: {
         type: Sequelize.STRING,
         allowNull: false,
         unique: true
       },
-      boqDate: {
-        type: Sequelize.DATE,
+      customerName: {
+        type: Sequelize.STRING,
         allowNull: false
       },
       totalAmount: {
-        type: Sequelize.DECIMAL,
-        allowNull: false,
-        precision: 10,
-        scale: 2
+        type: Sequelize.DECIMAL(10, 2),
+        allowNull: false
+      },
+      poDate: {
+        type: Sequelize.DATE,
+        allowNull: false
       },
       status: {
-        type: Sequelize.STRING,
-        defaultValue: 'draft'
+        type: Sequelize.ENUM('pending', 'approved', 'in_progress', 'completed', 'cancelled'),
+        defaultValue: 'pending'
       },
-      approvedBy: {
+      filePath: {
+        type: Sequelize.STRING,
+        allowNull: true
+      },
+      createdBy: {
         type: Sequelize.UUID,
+        allowNull: false,
         references: {
           model: 'users',
           key: 'id'
-        }
-      },
-      approvedAt: {
-        type: Sequelize.DATE
-      },
-      notes: {
-        type: Sequelize.TEXT
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'RESTRICT'
       },
       createdAt: {
         type: Sequelize.DATE,
@@ -61,6 +56,6 @@ module.exports = {
   },
 
   async down (queryInterface, Sequelize) {
-        await queryInterface.dropTable('ericsson_boqs');
+    await queryInterface.dropTable('huawei_pos');
   }
 };

@@ -14,7 +14,8 @@ module.exports = {
         allowNull: false
       },
       description: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        allowNull: true
       },
       isActive: {
         type: Sequelize.BOOLEAN,
@@ -32,6 +33,6 @@ module.exports = {
   },
 
   async down (queryInterface, Sequelize) {
-        await queryInterface.dropTable('teams');
+    await queryInterface.dropTable('teams');
   }
 };

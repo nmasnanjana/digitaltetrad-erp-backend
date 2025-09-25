@@ -3,7 +3,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up (queryInterface, Sequelize) {
-    await queryInterface.createTable('customers', {
+    await queryInterface.createTable('expense_types', {
       id: {
         type: Sequelize.UUID,
         primaryKey: true,
@@ -11,16 +11,12 @@ module.exports = {
       },
       name: {
         type: Sequelize.STRING,
-        allowNull: false
+        allowNull: false,
+        unique: true
       },
-      email: {
-        type: Sequelize.STRING
-      },
-      phone: {
-        type: Sequelize.STRING
-      },
-      address: {
-        type: Sequelize.TEXT
+      description: {
+        type: Sequelize.TEXT,
+        allowNull: true
       },
       isActive: {
         type: Sequelize.BOOLEAN,
@@ -38,6 +34,6 @@ module.exports = {
   },
 
   async down (queryInterface, Sequelize) {
-        await queryInterface.dropTable('customers');
+    await queryInterface.dropTable('expense_types');
   }
 };

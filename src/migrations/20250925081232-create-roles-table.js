@@ -6,9 +6,8 @@ module.exports = {
     await queryInterface.createTable('roles', {
       id: {
         type: Sequelize.UUID,
-        defaultValue: Sequelize.UUIDV4,
         primaryKey: true,
-        allowNull: false
+        defaultValue: Sequelize.UUIDV4
       },
       name: {
         type: Sequelize.STRING,
@@ -16,13 +15,12 @@ module.exports = {
         unique: true
       },
       description: {
-        type: Sequelize.STRING,
+        type: Sequelize.TEXT,
         allowNull: true
       },
       isActive: {
         type: Sequelize.BOOLEAN,
-        defaultValue: true,
-        allowNull: false
+        defaultValue: true
       },
       createdAt: {
         type: Sequelize.DATE,

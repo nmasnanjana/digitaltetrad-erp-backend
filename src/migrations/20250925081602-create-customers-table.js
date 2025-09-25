@@ -3,29 +3,31 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up (queryInterface, Sequelize) {
-    await queryInterface.createTable('ericsson_rate_cards', {
+    await queryInterface.createTable('customers', {
       id: {
         type: Sequelize.UUID,
         primaryKey: true,
         defaultValue: Sequelize.UUIDV4
       },
-      rateCardName: {
+      name: {
         type: Sequelize.STRING,
         allowNull: false
       },
-      effectiveDate: {
-        type: Sequelize.DATE,
-        allowNull: false
+      email: {
+        type: Sequelize.STRING,
+        allowNull: true
       },
-      expiryDate: {
-        type: Sequelize.DATE
+      phone: {
+        type: Sequelize.STRING,
+        allowNull: true
+      },
+      address: {
+        type: Sequelize.TEXT,
+        allowNull: true
       },
       isActive: {
         type: Sequelize.BOOLEAN,
         defaultValue: true
-      },
-      notes: {
-        type: Sequelize.TEXT
       },
       createdAt: {
         type: Sequelize.DATE,
@@ -39,6 +41,6 @@ module.exports = {
   },
 
   async down (queryInterface, Sequelize) {
-        await queryInterface.dropTable('ericsson_rate_cards');
+    await queryInterface.dropTable('customers');
   }
 };

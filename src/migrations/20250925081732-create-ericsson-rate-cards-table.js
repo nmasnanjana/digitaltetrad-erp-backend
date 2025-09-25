@@ -3,38 +3,27 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up (queryInterface, Sequelize) {
-    await queryInterface.createTable('zte_rate_cards', {
+    await queryInterface.createTable('ericsson_rate_cards', {
       id: {
         type: Sequelize.INTEGER,
         primaryKey: true,
         autoIncrement: true,
         allowNull: false
       },
-      code: {
+      product_code: {
         type: Sequelize.STRING,
-        allowNull: false,
-        comment: 'Product/Service code'
+        allowNull: false
       },
-      item: {
-        type: Sequelize.STRING,
-        allowNull: false,
-        comment: 'Item description'
+      product_description: {
+        type: Sequelize.TEXT,
+        allowNull: false
       },
-      unit: {
-        type: Sequelize.STRING,
+      product_rate: {
+        type: Sequelize.DECIMAL(10, 2),
         allowNull: false,
-        comment: 'Unit of measurement'
-      },
-      price: {
-        type: Sequelize.FLOAT,
-        allowNull: false,
-        comment: 'Price per unit'
-      },
-      remark: {
-        type: Sequelize.STRING,
-        allowNull: false,
-        defaultValue: '',
-        comment: 'Additional remarks or notes'
+        validate: {
+          min: 0
+        }
       },
       uploaded_at: {
         type: Sequelize.DATE,
@@ -60,6 +49,6 @@ module.exports = {
   },
 
   async down (queryInterface, Sequelize) {
-    await queryInterface.dropTable('zte_rate_cards');
+    await queryInterface.dropTable('ericsson_rate_cards');
   }
 };

@@ -9,38 +9,44 @@ module.exports = {
         primaryKey: true,
         defaultValue: Sequelize.UUIDV4
       },
-      jobId: {
-        type: Sequelize.UUID,
-        allowNull: false,
-        references: {
-          model: 'jobs',
-          key: 'id'
-        }
-      },
       invoiceNumber: {
         type: Sequelize.STRING,
         allowNull: false,
         unique: true
       },
+      customerName: {
+        type: Sequelize.STRING,
+        allowNull: false
+      },
+      totalAmount: {
+        type: Sequelize.DECIMAL(10, 2),
+        allowNull: false
+      },
       invoiceDate: {
         type: Sequelize.DATE,
         allowNull: false
       },
-      totalAmount: {
-        type: Sequelize.DECIMAL,
-        allowNull: false,
-        precision: 10,
-        scale: 2
+      dueDate: {
+        type: Sequelize.DATE,
+        allowNull: true
       },
       status: {
+        type: Sequelize.ENUM('draft', 'sent', 'paid', 'overdue', 'cancelled'),
+        defaultValue: 'draft'
+      },
+      filePath: {
         type: Sequelize.STRING,
-        defaultValue: 'pending'
+        allowNull: true
       },
-      paymentDate: {
-        type: Sequelize.DATE
-      },
-      notes: {
-        type: Sequelize.TEXT
+      createdBy: {
+        type: Sequelize.UUID,
+        allowNull: false,
+        references: {
+          model: 'users',
+          key: 'id'
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'RESTRICT'
       },
       createdAt: {
         type: Sequelize.DATE,
@@ -54,6 +60,6 @@ module.exports = {
   },
 
   async down (queryInterface, Sequelize) {
-        await queryInterface.dropTable('ericsson_invoices');
+    await queryInterface.dropTable('ericsson_invoices');
   }
 };

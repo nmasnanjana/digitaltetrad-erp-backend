@@ -3,22 +3,28 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up (queryInterface, Sequelize) {
-    await queryInterface.createTable('inventory', {
+    await queryInterface.createTable('ericsson_boq_items', {
       id: {
         type: Sequelize.UUID,
         primaryKey: true,
         defaultValue: Sequelize.UUIDV4
       },
-      jobId: {
+      boqId: {
         type: Sequelize.UUID,
         allowNull: false,
         references: {
-          model: 'jobs',
+          model: 'ericsson_boqs',
           key: 'id'
-        }
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
       },
-      itemName: {
+      itemCode: {
         type: Sequelize.STRING,
+        allowNull: false
+      },
+      itemDescription: {
+        type: Sequelize.TEXT,
         allowNull: false
       },
       quantity: {
@@ -26,26 +32,12 @@ module.exports = {
         allowNull: false
       },
       unitPrice: {
-        type: Sequelize.DECIMAL,
-        allowNull: false,
-        precision: 10,
-        scale: 2
+        type: Sequelize.DECIMAL(10, 2),
+        allowNull: false
       },
       totalPrice: {
-        type: Sequelize.DECIMAL,
-        allowNull: false,
-        precision: 10,
-        scale: 2
-      },
-      status: {
-        type: Sequelize.STRING,
-        defaultValue: 'available'
-      },
-      returnDate: {
-        type: Sequelize.DATE
-      },
-      notes: {
-        type: Sequelize.TEXT
+        type: Sequelize.DECIMAL(10, 2),
+        allowNull: false
       },
       createdAt: {
         type: Sequelize.DATE,
@@ -59,6 +51,6 @@ module.exports = {
   },
 
   async down (queryInterface, Sequelize) {
-        await queryInterface.dropTable('inventory');
+    await queryInterface.dropTable('ericsson_boq_items');
   }
 };
