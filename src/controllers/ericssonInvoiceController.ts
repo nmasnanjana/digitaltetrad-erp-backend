@@ -40,27 +40,24 @@ export class EricssonInvoiceController {
                 return;
             }
 
-            // Update invoiced percentages for BOQ items
+            // Mark BOQ items as invoiced (100% billing)
             if (items && items.length > 0) {
                 const EricssonBoqItem = require('../models/ericssonBoqItem').default;
                 
                 for (const item of items) {
-                    if (item.id && item.need_to_invoice_percentage) {
+                    if (item.id) {
                         const boqItem = await EricssonBoqItem.findByPk(item.id);
                         if (boqItem) {
-                            const currentInvoiced = parseFloat(boqItem.invoiced_percentage) || 0;
-                            const newInvoiced = currentInvoiced + parseFloat(item.need_to_invoice_percentage);
-                            
-                            if (newInvoiced > 100) {
+                            if (boqItem.is_invoiced) {
                                 res.status(400).json({
                                     success: false,
-                                    message: `Cannot invoice ${item.need_to_invoice_percentage}% for item ${item.service_number}. Already invoiced ${currentInvoiced}%, total would exceed 100% (${newInvoiced}%)`
+                                    message: `Item ${item.service_number} has already been invoiced`
                                 });
                                 return;
                             }
                             
-                            await boqItem.update({ invoiced_percentage: newInvoiced });
-                            logger.info(`Updated invoiced percentage for item ${item.id} from ${currentInvoiced}% to ${newInvoiced}%`);
+                            await boqItem.update({ is_invoiced: true });
+                            logger.info(`Marked Ericsson BOQ item ${item.id} as invoiced`);
                         }
                     }
                 }

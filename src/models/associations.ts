@@ -16,6 +16,8 @@ import HuaweiPo from "./huaweiPo";
 import HuaweiInvoice from "./huaweiInvoice";
 import EricssonRateCard from "./ericssonRateCard";
 import EricssonInvoice from "./ericssonInvoice";
+import ZtePo from "./ztePo";
+import ZteInvoice from "./zteInvoice";
 
 // Role-User relationship
 User.belongsTo(Role, { foreignKey: 'roleId', as: 'role' });
@@ -115,6 +117,20 @@ EricssonBoqSurplusMaterial.belongsTo(EricssonBoq, { foreignKey: 'boq_id', as: 'b
 // Rate card relationship with BOQ items
 EricssonBoqItem.belongsTo(EricssonRateCard, { foreignKey: 'rate_card_id', as: 'rateCard' });
 EricssonRateCard.hasMany(EricssonBoqItem, { foreignKey: 'rate_card_id', as: 'boqItems' });
+
+// ZTE PO relationships
+ZtePo.belongsTo(Job, { foreignKey: 'job_id', as: 'job' });
+ZtePo.belongsTo(Customer, { foreignKey: 'customer_id', as: 'customer' });
+ZtePo.belongsTo(User, { foreignKey: 'uploaded_by', as: 'uploader' });
+Job.hasMany(ZtePo, { foreignKey: 'job_id', as: 'ztePos' });
+Customer.hasMany(ZtePo, { foreignKey: 'customer_id', as: 'ztePos' });
+User.hasMany(ZtePo, { foreignKey: 'uploaded_by', as: 'uploadedZtePos' });
+
+// ZTE Invoice relationships
+ZteInvoice.belongsTo(ZtePo, { foreignKey: 'zte_po_id', as: 'ztePo' });
+ZteInvoice.belongsTo(User, { foreignKey: 'created_by', as: 'creator' });
+ZtePo.hasMany(ZteInvoice, { foreignKey: 'zte_po_id', as: 'zteInvoices' });
+User.hasMany(ZteInvoice, { foreignKey: 'created_by', as: 'createdZteInvoices' });
 
 // Export setup in case needed
 export const setupAssociations = () => {

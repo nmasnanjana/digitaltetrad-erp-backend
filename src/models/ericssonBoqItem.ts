@@ -12,7 +12,7 @@ interface EricssonBoqItemAttributes {
     total_amount: number;
     is_additional_work: boolean;
     rate_card_id?: number | null;
-    invoiced_percentage: number;
+    is_invoiced: boolean;
     uploaded_at?: Date;
     uploaded_by?: string | null;
 }
@@ -32,7 +32,7 @@ class EricssonBoqItem extends Model<EricssonBoqItemAttributes, EricssonBoqItemCr
     public total_amount!: number;
     public is_additional_work!: boolean;
     public rate_card_id?: number | null;
-    public invoiced_percentage!: number;
+    public is_invoiced!: boolean;
     public uploaded_at?: Date;
     public uploaded_by?: string | null;
 }
@@ -100,14 +100,10 @@ EricssonBoqItem.init(
                 key: 'id'
             }
         },
-        invoiced_percentage: {
-            type: DataTypes.DECIMAL(5, 2),
+        is_invoiced: {
+            type: DataTypes.BOOLEAN,
             allowNull: false,
-            defaultValue: 0,
-            validate: {
-                min: 0,
-                max: 100
-            }
+            defaultValue: false
         },
         uploaded_at: {
             type: DataTypes.DATE,

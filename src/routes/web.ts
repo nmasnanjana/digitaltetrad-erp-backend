@@ -17,6 +17,8 @@ import ericssonRateCardRoute from "./ericssonRateCardRoute";
 import zteRateCardRoute from "./zteRateCardRoute";
 import ericssonBoqRoute from "./ericssonBoqRoute";
 import ericssonInvoiceRoute from "./ericssonInvoiceRoute";
+import ztePoRoute from "./ztePoRoute";
+import zteInvoiceRoute from "./zteInvoiceRoute";
 import settingsRoute from "./settingsRoute";
 import cacheRoute from "./cacheRoute";
 import { checkPermission } from "../middleware/checkPermission";
@@ -51,6 +53,8 @@ router.use("/ericsson-rate-cards", authenticate, ericssonRateCardRoute);
 router.use("/zte-rate-cards", authenticate, zteRateCardRoute);
 router.use("/ericsson-boqs", authenticate, ericssonBoqRoute);
 router.use("/ericsson-invoices", authenticate, ericssonInvoiceRoute);
+router.use("/zte-pos", authenticate, ztePoRoute);
+router.use("/zte-invoices", authenticate, zteInvoiceRoute);
 router.use("/settings", authenticate, settingsRoute);
 router.use("/cache", authenticate, cacheRoute);
 
